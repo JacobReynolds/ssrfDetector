@@ -73,7 +73,7 @@ app.get('/dashboard', function (req, res) {
 		});
 	} else {
 		res.render('login', {
-			user: req.user
+			errorMessage: 'Please log in'
 		});
 	}
 });
@@ -128,7 +128,7 @@ passport.use('login', new LocalStrategy({
 				if (!user) {
 					console.log("COULD NOT LOG IN");
 					req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
-					done(null, user);
+					done(null, null, req.flash('error', 'Invalid credentials'));
 				}
 			})
 			.fail(function (err) {
@@ -151,7 +151,6 @@ passport.use('register', new LocalStrategy({
 					done(null, null, req.flash('error', 'Password mismatch'));
 				} else if (user) {
 					console.log("REGISTERED: " + user.username);
-					req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
 					done(null, user);
 				}
 			})
