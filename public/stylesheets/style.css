@@ -1,8 +1,32 @@
+html,
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+	font-family: 'Roboto', sans-serif;
+	margin: 0px;
+	padding: 0px;
 }
-
 a {
-  color: #00B7FF;
+	color: #00B7FF;
+}
+#header {
+	width: 100vw;
+	height: 150px;
+	background: gray;
+}
+#header h1 {
+	margin-top: 0px;
+	height: 75px;
+	line-height: 75px;
+}
+#header #logo {
+	text-align: center;
+}
+.navOption {
+	text-align: center;
+	font-size: 24px;
+	transition: color .5s ease;
+	height: 75px;
+	cursor: pointer;
+}
+.navOption:hover {
+	color: white;
 }

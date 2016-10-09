@@ -1,0 +1,6 @@
+extends layout
+block append headExtender
+	link(rel='stylesheet', href='/stylesheets/dashboard.css')
+	
+block content
+	h1 hello #{user.username}

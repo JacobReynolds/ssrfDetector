@@ -7,9 +7,12 @@ lib-cov
 *.pid
 *.gz
 
+db.js
+help.txt
 pids
 logs
 results
 build
+data
 
 node_modules
