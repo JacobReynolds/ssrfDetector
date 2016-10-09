@@ -9,14 +9,13 @@ var express = require('express'),
 	TwitterStrategy = require('passport-twitter'),
 	GoogleStrategy = require('passport-google'),
 	FacebookStrategy = require('passport-facebook'),
-	flash = require('connect-flash');
-
-//var config = require('./config.js'), //config file contains all tokens and other private info
-var funct = require('./functions.js'); //funct file contains our helper functions for our Passport and database work
+	flash = require('connect-flash'),
+	crypto = require('crypto'),
+	sendMail = require('../misc/sendMail.js'),
+	database = require('../misc/database.js'); //funct file contains our helper functions for our Passport and database work
 
 /* GET home page. */
 var app = express();
-app.use(logger('combined'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
 	extended: false
@@ -56,14 +55,10 @@ app.get('*', function (req, res, next) {
 	next();
 });
 app.get('/login', function (req, res) {
-	res.render('login', {
-		errorMessage: req.flash('error')
-	});
+	res.render('login');
 });
 app.get('/register', function (req, res) {
-	res.render('register', {
-		errorMessage: req.flash('error')
-	});
+	res.render('register');
 });
 
 app.get('/dashboard', function (req, res) {
@@ -73,10 +68,28 @@ app.get('/dashboard', function (req, res) {
 		});
 	} else {
 		res.render('login', {
-			errorMessage: 'Please log in'
+			error: 'Please log in'
 		});
 	}
 });
+app.get('/resetPassword', function (req, res) {
+	res.render('resetPassword');
+});
+
+app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
+	database.getResetLink(req)
+		.then(function (link) {
+			res.render('resetPasswordForm', {
+				resetLink: link
+			})
+		})
+		.fail(function (err) {
+			res.render('login', {
+				errorMessage: 'Incorrect reset link'
+			})
+		}).catch(next);
+});
+
 app.get('/', function (req, res) {
 	res.render('index', {
 		user: req.user
@@ -84,11 +97,37 @@ app.get('/', function (req, res) {
 });
 
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
+app.post('/resetPasswordForm', function (req, res) {
+	database.resetPassword(req)
+		.then(function (message) {
+			res.render('login', {
+				message: message
+			})
+		})
+		.fail(function (err) {
+			res.render('login', {
+				errorMessage: 'Error resetting password'
+			})
+		})
+});
+//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/register', passport.authenticate('register', {
 	successRedirect: '/dashboard',
 	failureRedirect: '/register',
 	failureFlash: true
 }));
+//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
+app.post('/sendResetLink', function (req, res) {
+	database.setResetLink(req).then(function (data) {
+			sendMail.sendMail('resetLink', data.email, data.resetLink);
+			res.render('resetPassword', {
+				message: 'Please check your email for a password reset link'
+			})
+		})
+		.fail(function (err) {
+			return err;
+		});
+})
 
 //sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/login', passport.authenticate('login', {
@@ -106,33 +145,28 @@ app.get('/logout', function (req, res) {
 	req.session.notice = "You have successfully been logged out " + name + "!";
 });
 passport.serializeUser(function (user, done) {
-	console.log("serializing " + user.username);
 	done(null, user);
 });
 
 passport.deserializeUser(function (obj, done) {
-	console.log("deserializing " + obj);
 	done(null, obj);
 });
 passport.use('login', new LocalStrategy({
 		passReqToCallback: true
 	}, //allows us to pass back the request to the callback
 	function (req, username, password, done) {
-		funct.localAuth(req, username, password)
+		database.localAuth(req, username, password)
 			.then(function (user) {
 				if (user) {
-					console.log("LOGGED IN AS: " + user.username);
-					req.session.success = 'You are successfully logged in ' + user.username + '!';
 					done(null, user);
 				}
 				if (!user) {
-					console.log("COULD NOT LOG IN");
 					req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
-					done(null, null, req.flash('error', 'Invalid credentials'));
+					done(null, null);
 				}
 			})
 			.fail(function (err) {
-				console.log(err.body);
+				req.session.error = 'Error. Please try again.'; //inform user could not log them in
 			});
 	}
 ));
@@ -141,14 +175,16 @@ passport.use('register', new LocalStrategy({
 		passReqToCallback: true
 	}, //allows us to pass back the request to the callback
 	function (req, username, password, done) {
-		funct.localReg(req, username, password)
+		database.localReg(req, username, password)
 			.then(function (user) {
 				if (user === "exists") {
 					console.log("COULD NOT REGISTER");
-					done(null, null, req.flash('error', 'Username not available'));
+					req.session.error = 'Username or email not available';
+					done(null, null);
 				} else if (user === "passMismatch") {
 					console.log("Password mismatch");
-					done(null, null, req.flash('error', 'Password mismatch'));
+					req.session.error = 'Passwords must match';
+					done(null, null);
 				} else if (user) {
 					console.log("REGISTERED: " + user.username);
 					done(null, user);
@@ -159,5 +195,41 @@ passport.use('register', new LocalStrategy({
 			});
 	}
 ));
+
+function sendResetLink(req) {
+	var deferred = Q.defer();
+	database.setResetLink(req).then(function (email, resetLink) {
+			sendMail.sendMail('resetLink', email, resetLink);
+			deferred.resolve('Please check your email for a password reset link');
+		})
+		.fail(function (err) {
+			return err;
+		});
+	return deferred.promise;
+}
+
+function getResetLink(req) {
+	var deferred = Q.defer();
+	database.getResetLink(req)
+		.then(function (user) {
+			deferred.resolve(true, req.params.resetLink);
+		})
+		.fail(function (err) {
+			deferred.resolve(false);
+		});
+	return deferred.promise;
+}
+
+function resetPassword(req) {
+	var deferred = Q.defer();
+	database.resetPassword(req)
+		.then(function (user) {
+			deferred.resolve("Password reset");
+		})
+		.fail(function (err) {
+			deferred.resolve(null, "Error resetting password");
+		});
+	return deferred.promise;
+}
 
 module.exports = app;
