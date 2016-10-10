@@ -1,5 +1,8 @@
 extends layout
+block append headExtender
+	link(rel="stylesheet", href="/stylesheets/index.css")
 
 block content
-	h1 Welcome to the SSRF Detector
-	p Created by Jake Reynolds
+	div#indexHeader
+		h1 Welcome to the SSRF Detector
+		p Created by Jake Reynolds

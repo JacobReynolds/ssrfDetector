@@ -128,7 +128,6 @@ exports.getResetLink = function (req) {
 	db.find({
 		'resetLink': resetLink
 	}).toArray(function (err, docs) {
-		console.log('docs: ' + JSON.stringify(docs));
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
@@ -138,6 +137,40 @@ exports.getResetLink = function (req) {
 			deferred.reject("Expired or non-existent link.");
 		} else {
 			deferred.resolve(resetLink);
+		}
+	})
+
+	return deferred.promise;
+}
+
+
+exports.registerDomain = function (req) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	var domain = req.body.domain;
+	db.find({
+		'domain': domain
+	}).toArray(function (err, docs) {
+		if (err != null) {
+			console.log("Error: " + err.body);
+			deferred.reject(err.body);
+		} else if (docs.length === 0) {
+			db.updateOne({
+				username: req.user.username
+			}, {
+				$set: {
+					domain: domain
+				}
+			}, function (err, result) {
+				if (err === null) {
+					deferred.resolve(true);
+				} else {
+					console.log("Register domain FAIL:" + err.body);
+					deferred.reject(new Error(err.body));
+				}
+			});
+		} else {
+			deferred.reject("Domain already registered");
 		}
 	})
 

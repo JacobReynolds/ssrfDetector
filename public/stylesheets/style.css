@@ -3,6 +3,7 @@ body {
 	font-family: 'Roboto', sans-serif;
 	margin: 0px;
 	padding: 0px;
+	background: #FFFFFA;
 }
 a {
 	color: #00B7FF;
@@ -10,10 +11,11 @@ a {
 #header {
 	width: 100vw;
 	height: 150px;
-	background: gray;
+	background: #508991;
+	color: #FFFFFA;
 }
 #header h1 {
-	margin-top: 0px;
+	margin: 0px;
 	height: 75px;
 	line-height: 75px;
 }
@@ -23,10 +25,15 @@ a {
 .navOption {
 	text-align: center;
 	font-size: 24px;
-	transition: color .5s ease;
+	transition: background .5s ease;
+	line-height: 75px;
+	padding: 0px;
 	height: 75px;
 	cursor: pointer;
 }
 .navOption:hover {
-	color: white;
+	background: #172A3A;
+}
+.message {
+	font-size: 20px;
 }

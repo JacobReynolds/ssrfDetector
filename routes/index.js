@@ -49,17 +49,36 @@ app.use(function (req, res, next) {
 	next();
 });
 app.get('*', function (req, res, next) {
-	// put user into res.locals for easy access from templates
 	res.locals.user = req.user || null;
 
 	next();
 });
+
+app.get('/', function (req, res) {
+	res.render('index', {
+		user: req.user
+	});
+});
+
 app.get('/login', function (req, res) {
 	res.render('login');
 });
+
+app.post('/login', passport.authenticate('login', {
+	successRedirect: '/dashboard',
+	failureRedirect: '/login',
+	failureFlash: true
+}));
+
 app.get('/register', function (req, res) {
 	res.render('register');
 });
+
+app.post('/register', passport.authenticate('register', {
+	successRedirect: '/dashboard',
+	failureRedirect: '/register',
+	failureFlash: true
+}));
 
 app.get('/dashboard', function (req, res) {
 	if (req.isAuthenticated()) {
@@ -72,10 +91,46 @@ app.get('/dashboard', function (req, res) {
 		});
 	}
 });
-app.get('/resetPassword', function (req, res) {
-	res.render('resetPassword');
+
+app.post('/registerDomain', function (req, res) {
+	if (req.isAuthenticated()) {
+		database.registerDomain(req).then(function (data) {
+				res.render('dashboard', {
+					message: 'Domain registered',
+					user: req.user
+				})
+			})
+			.fail(function (err) {
+				res.render('dashboard', {
+					error: 'Error registering domain',
+					user: req.user
+				})
+			});
+	} else {
+		res.render('login', {
+			error: 'Please log in'
+		});
+	}
+})
+
+//Page for requesting a password reset email
+app.get('/resetPasswordEmail', function (req, res) {
+	res.render('resetPasswordEmail');
 });
 
+app.post('/resetPasswordEmail', function (req, res) {
+	database.setResetLink(req).then(function (data) {
+			sendMail.sendMail('resetLink', data.email, data.resetLink);
+			res.render('resetPasswordEmail', {
+				message: 'Please check your email for a password reset link'
+			})
+		})
+		.fail(function (err) {
+			return err;
+		});
+})
+
+//Page for actually resetting the password
 app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 	database.getResetLink(req)
 		.then(function (link) {
@@ -90,13 +145,6 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 		}).catch(next);
 });
 
-app.get('/', function (req, res) {
-	res.render('index', {
-		user: req.user
-	});
-});
-
-//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 app.post('/resetPasswordForm', function (req, res) {
 	database.resetPassword(req)
 		.then(function (message) {
@@ -110,31 +158,6 @@ app.post('/resetPasswordForm', function (req, res) {
 			})
 		})
 });
-//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
-app.post('/register', passport.authenticate('register', {
-	successRedirect: '/dashboard',
-	failureRedirect: '/register',
-	failureFlash: true
-}));
-//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
-app.post('/sendResetLink', function (req, res) {
-	database.setResetLink(req).then(function (data) {
-			sendMail.sendMail('resetLink', data.email, data.resetLink);
-			res.render('resetPassword', {
-				message: 'Please check your email for a password reset link'
-			})
-		})
-		.fail(function (err) {
-			return err;
-		});
-})
-
-//sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
-app.post('/login', passport.authenticate('login', {
-	successRedirect: '/dashboard',
-	failureRedirect: '/login',
-	failureFlash: true
-}));
 
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function (req, res) {
@@ -144,6 +167,11 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 	req.session.notice = "You have successfully been logged out " + name + "!";
 });
+
+
+//=======================PASSPORT CODE=======================
+
+
 passport.serializeUser(function (user, done) {
 	done(null, user);
 });
@@ -151,6 +179,7 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (obj, done) {
 	done(null, obj);
 });
+
 passport.use('login', new LocalStrategy({
 		passReqToCallback: true
 	}, //allows us to pass back the request to the callback
@@ -170,6 +199,7 @@ passport.use('login', new LocalStrategy({
 			});
 	}
 ));
+
 // Use the LocalStrategy within Passport to register/"signup" users.
 passport.use('register', new LocalStrategy({
 		passReqToCallback: true
@@ -195,41 +225,5 @@ passport.use('register', new LocalStrategy({
 			});
 	}
 ));
-
-function sendResetLink(req) {
-	var deferred = Q.defer();
-	database.setResetLink(req).then(function (email, resetLink) {
-			sendMail.sendMail('resetLink', email, resetLink);
-			deferred.resolve('Please check your email for a password reset link');
-		})
-		.fail(function (err) {
-			return err;
-		});
-	return deferred.promise;
-}
-
-function getResetLink(req) {
-	var deferred = Q.defer();
-	database.getResetLink(req)
-		.then(function (user) {
-			deferred.resolve(true, req.params.resetLink);
-		})
-		.fail(function (err) {
-			deferred.resolve(false);
-		});
-	return deferred.promise;
-}
-
-function resetPassword(req) {
-	var deferred = Q.defer();
-	database.resetPassword(req)
-		.then(function (user) {
-			deferred.resolve("Password reset");
-		})
-		.fail(function (err) {
-			deferred.resolve(null, "Error resetting password");
-		});
-	return deferred.promise;
-}
 
 module.exports = app;
