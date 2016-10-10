@@ -48,11 +48,53 @@ app.use(function (req, res, next) {
 
 	next();
 });
-app.get('*', function (req, res, next) {
+app.all('*', function (req, res, next) {
 	res.locals.user = req.user || null;
 
 	next();
 });
+
+app.all('/profile/*', function (req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login', {
+			error: 'Please log in'
+		});
+	}
+})
+
+//Should find a way to put /profile and /profile/* into one, will do later
+app.all('/profile', function (req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login', {
+			error: 'Please log in'
+		});
+	}
+})
+
+app.all('/dashboard/*', function (req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login', {
+			error: 'Please log in'
+		});
+	}
+})
+
+//Should find a way to put /profile and /profile/* into one, will do later
+app.all('/dashboard', function (req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login', {
+			error: 'Please log in'
+		});
+	}
+})
 
 app.get('/', function (req, res) {
 	res.render('index', {
@@ -63,6 +105,25 @@ app.get('/', function (req, res) {
 app.get('/login', function (req, res) {
 	res.render('login');
 });
+
+app.get('/profile', function (req, res) {
+	res.render('profile', {
+		user: req.user
+	});
+});
+
+app.post('/profile/updatePassword', function (req, res, next) {
+	database.updatePassword(req).then(function (data) {
+			res.render('profile', {
+				message: data
+			})
+		})
+		.fail(function (err) {
+			res.render('profile', {
+				error: err
+			});
+		}).catch(next);;
+})
 
 app.post('/login', passport.authenticate('login', {
 	successRedirect: '/dashboard',
@@ -81,36 +142,24 @@ app.post('/register', passport.authenticate('register', {
 }));
 
 app.get('/dashboard', function (req, res) {
-	if (req.isAuthenticated()) {
-		res.render('dashboard', {
-			user: req.user
-		});
-	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
-	}
+	res.render('dashboard', {
+		user: req.user
+	});
 });
 
-app.post('/registerDomain', function (req, res) {
-	if (req.isAuthenticated()) {
-		database.registerDomain(req).then(function (data) {
-				res.render('dashboard', {
-					message: 'Domain registered',
-					user: req.user
-				})
+app.post('/profile/registerDomain', function (req, res, next) {
+	database.registerDomain(req).then(function (data) {
+			res.render('dashboard', {
+				message: 'Domain registered',
+				user: req.user
 			})
-			.fail(function (err) {
-				res.render('dashboard', {
-					error: 'Error registering domain',
-					user: req.user
-				})
-			});
-	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
-	}
+		})
+		.fail(function (err) {
+			res.render('dashboard', {
+				error: 'Error registering domain',
+				user: req.user
+			})
+		}).catch(next);
 })
 
 //Page for requesting a password reset email
@@ -118,7 +167,7 @@ app.get('/resetPasswordEmail', function (req, res) {
 	res.render('resetPasswordEmail');
 });
 
-app.post('/resetPasswordEmail', function (req, res) {
+app.post('/resetPasswordEmail', function (req, res, next) {
 	database.setResetLink(req).then(function (data) {
 			sendMail.sendMail('resetLink', data.email, data.resetLink);
 			res.render('resetPasswordEmail', {
@@ -126,8 +175,10 @@ app.post('/resetPasswordEmail', function (req, res) {
 			})
 		})
 		.fail(function (err) {
-			return err;
-		});
+			res.render('resetPasswordEmail', {
+				error: 'Error sending password reset email'
+			})
+		}).catch(next);
 })
 
 //Page for actually resetting the password
@@ -145,7 +196,7 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 		}).catch(next);
 });
 
-app.post('/resetPasswordForm', function (req, res) {
+app.post('/resetPasswordForm', function (req, res, next) {
 	database.resetPassword(req)
 		.then(function (message) {
 			res.render('login', {
@@ -156,7 +207,7 @@ app.post('/resetPasswordForm', function (req, res) {
 			res.render('login', {
 				errorMessage: 'Error resetting password'
 			})
-		})
+		}).catch(next);
 });
 
 //logs user out of site, deleting them from the session, and returns to homepage

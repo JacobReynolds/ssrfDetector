@@ -7,3 +7,15 @@
 span {
 	font-size: 24px;
 }
+.dashboardOption {
+	text-align: center;
+	font-size: 24px;
+	transition: background .5s ease;
+	line-height: 75px;
+	padding: 0px;
+	height: 75px;
+	cursor: pointer;
+}
+.dashboardOption:hover {
+	background: #172A3A;
+}

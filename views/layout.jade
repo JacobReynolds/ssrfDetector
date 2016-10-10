@@ -11,9 +11,11 @@ html
 		div#header
 			h1#logo SSRF Detector
 			div(onclick="window.location.href='/'").col-sm-4.col-xs-12.navOption Home
-			div(onclick="window.location.href='/dashboard'").col-sm-4.col-xs-12.navOption Dashboard
 			if locals.user != null
+				div(onclick="window.location.href='/dashboard'").col-sm-2.col-xs-12.navOption Dashboard
+				div(onclick="window.location.href='/profile'").col-sm-2.col-xs-12.navOption Profile
 				div(onclick="window.location.href='/logout'").col-sm-4.col-xs-12.navOption Logout
 			else
+				div(onclick="window.location.href='/dashboard'").col-sm-4.col-xs-12.navOption Dashboard
 				div(onclick="window.location.href='/login'").col-sm-4.col-xs-12.navOption Login
 		block content
