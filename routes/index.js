@@ -30,9 +30,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-app.get('/', function (req, res) {
-	res.render('index');
-});
 app.use(function (req, res, next) {
 	var err = req.session.error,
 		msg = req.session.notice,
@@ -97,13 +94,14 @@ app.all('/dashboard', function (req, res, next) {
 })
 
 app.get('/', function (req, res) {
-	res.render('index', {
-		user: req.user
-	});
+	res.render('index');
 });
 
 app.get('/login', function (req, res) {
-	res.render('login');
+	res.render('login', {
+		message: req.query.message,
+		error: req.query.error,
+	});
 });
 
 app.get('/profile', function (req, res) {
@@ -122,7 +120,7 @@ app.post('/profile/updatePassword', function (req, res, next) {
 			res.render('profile', {
 				error: err
 			});
-		}).catch(next);;
+		}).catch(next);
 })
 
 app.post('/login', passport.authenticate('login', {
@@ -190,15 +188,14 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 			})
 		})
 		.fail(function (err) {
-			res.render('login', {
-				errorMessage: 'Incorrect reset link'
-			})
+			res.redirect('/login?error=Expired%20or%20non-existent%20reset%20link');
 		}).catch(next);
 });
 
 app.post('/resetPasswordForm', function (req, res, next) {
 	database.resetPassword(req)
 		.then(function (message) {
+			console.log('reset .then');
 			res.render('login', {
 				message: message
 			})
@@ -235,6 +232,7 @@ passport.use('login', new LocalStrategy({
 		passReqToCallback: true
 	}, //allows us to pass back the request to the callback
 	function (req, username, password, done) {
+		username = username.toLowerCase();
 		database.localAuth(req, username, password)
 			.then(function (user) {
 				if (user) {
@@ -256,24 +254,31 @@ passport.use('register', new LocalStrategy({
 		passReqToCallback: true
 	}, //allows us to pass back the request to the callback
 	function (req, username, password, done) {
-		database.localReg(req, username, password)
-			.then(function (user) {
-				if (user === "exists") {
-					console.log("COULD NOT REGISTER");
-					req.session.error = 'Username or email not available';
-					done(null, null);
-				} else if (user === "passMismatch") {
-					console.log("Password mismatch");
-					req.session.error = 'Passwords must match';
-					done(null, null);
-				} else if (user) {
-					console.log("REGISTERED: " + user.username);
-					done(null, user);
-				}
-			})
-			.fail(function (err) {
-				console.log(err);
-			});
+		username = username.toLowerCase();
+		var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
+		if (userAlphaNumeric.test(username)) {
+			database.localReg(req, username, password)
+				.then(function (user) {
+					if (user === "exists") {
+						console.log("COULD NOT REGISTER");
+						req.session.error = 'Username or email not available';
+						done(null, null);
+					} else if (user === "passMismatch") {
+						console.log("Password mismatch");
+						req.session.error = 'Passwords must match';
+						done(null, null);
+					} else if (user) {
+						console.log("REGISTERED: " + user.username);
+						done(null, user);
+					}
+				})
+				.fail(function (err) {
+					console.log(err);
+				});
+		} else {
+			req.session.error = 'Username can only be A-Za-z0-9';
+			done(null, null);
+		}
 	}
 ));
 
