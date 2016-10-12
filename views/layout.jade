@@ -9,7 +9,7 @@ html
 		block headExtender
 	body
 		div#header
-			h1#logo SSRF Detector
+			img(src="/images/logo.png")#logo
 			div(onclick="window.location.href='/'").col-sm-4.col-xs-12.navOption Home
 			if locals.user != null
 				div(onclick="window.location.href='/dashboard'").col-sm-2.col-xs-12.navOption Dashboard

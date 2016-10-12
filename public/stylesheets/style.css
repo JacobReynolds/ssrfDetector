@@ -10,30 +10,71 @@ a {
 }
 #header {
 	width: 100vw;
-	height: 150px;
+	height: 100px;
 	background: #508991;
 	color: #FFFFFA;
+	position: relative;
 }
 #header h1 {
 	margin: 0px;
 	height: 75px;
 	line-height: 75px;
 }
+#logoWrapper {
+	position: relative;
+	padding: 0px;
+}
 #header #logo {
-	text-align: center;
+	margin-top: 12.5px;
+	position: absolute;
+	width: 100%;
+	height: 75px;
+	width: 75px;
+	margin-left: 15px;
 }
 .navOption {
 	text-align: center;
 	font-size: 24px;
 	transition: background .5s ease;
-	line-height: 75px;
+	line-height: 100px;
 	padding: 0px;
-	height: 75px;
+	height: 100px;
 	cursor: pointer;
+	position: relative;
+}
+.navOption:first-of-type {
+	margin-left: 100px;
 }
 .navOption:hover {
 	background: #172A3A;
 }
 .message {
 	font-size: 20px;
+}
+@media (min-width: 768px) {
+	#header .col-sm-4 {
+		width: calc(33.33333333% - 33.33px);
+	}
+	#header .col-sm-2 {
+		width: calc(16.66666667% - 16.66px);
+	}
+}
+@media (max-width: 768px) {
+	#header .col-sm-4 {
+		width: calc(33.33333333% - 33.33px);
+	}
+	#header .col-sm-2 {
+		width: calc(16.66666667% - 16.66px);
+	}
+	#header .col-xs-12 {
+		width: calc(100% - 100px);
+	}
+	.navOption {
+		height: 25px;
+		line-height: 25px;
+		margin-left: 100px;
+	}
+	#header {
+		100px;
+	}
 }
