@@ -91,7 +91,7 @@ app.all('/dashboard/*', function (req, res, next) {
 	}
 })
 
-//Should find a way to put /profile and /profile/* into one, will do later
+//Should find a way to put /dashboard and /dashboard/* into one, will do later
 app.all('/dashboard', function (req, res, next) {
 	if (req.isAuthenticated()) {
 		next();
@@ -128,7 +128,7 @@ app.post('/profile/changePassword', function (req, res, next) {
 			})
 		})
 		.fail(function (err) {
-			res.render('profile', {
+			res.render('profile/changePassword', {
 				error: err
 			});
 		}).catch(next);
