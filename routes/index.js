@@ -226,11 +226,8 @@ app.post('/resetPasswordForm', function (req, res, next) {
 
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function (req, res) {
-	var name = req.user.username;
-	console.log("LOGGIN OUT " + req.user.username)
 	req.logout();
 	res.redirect('/');
-	req.session.notice = "You have successfully been logged out " + name + "!";
 });
 
 app.post('/reportDomain', function (req, res) {
