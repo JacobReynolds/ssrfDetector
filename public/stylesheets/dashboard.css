@@ -1,7 +1,7 @@
 #hello {
 	text-align: center;
 }
-#registerDomain input {
+#registerDomain #domainBox {
 	width: 200px !important;
 }
 span {
