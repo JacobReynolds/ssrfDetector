@@ -237,7 +237,6 @@ app.get('/logout', function (req, res) {
 });
 
 app.post('/reportDomain', function (req, res) {
-	console.log('req body: ' + JSON.stringify(req.body));
 	if (req.body.apiKey === reportingApiKey) {
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
