@@ -4,11 +4,11 @@ var creds;
 var crypto = require('crypto');
 
 function resetPasswordTemplate(token) {
-	return '<html><body>Your reset link is: http://ssrfdetector.com/resetPasswordForm/' + token + '.  Please log in and update it.';
+	return '<html><body>Your reset link is: https://ssrfdetector.com/resetPasswordForm/' + token + '.  Please log in and update it.';
 }
 
 function sendReportTemplate(ip) {
-	return '<html><body>SSRF has been detected from IP address: ' + ip + '.  Please log on to <a href="http://ssrfdetector.com">SSRF Detector</a> to learn more</body></html>';
+	return '<html><body>SSRF has been detected from IP address: ' + ip + '.  Please log on to <a href="https://ssrfdetector.com">SSRF Detector</a> to learn more</body></html>';
 }
 var apiKey, domain, from, mailgun;
 fs.readFile(__dirname + '/../.creds/mailgun.json', 'utf8', function (err, data) {

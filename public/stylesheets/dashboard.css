@@ -19,3 +19,8 @@ span {
 li {
 	list-style-type: none;
 }
+#profileButtons button {
+	margin-bottom: 10px;
+	font-size: 24px;
+	height: 75px;
+}
