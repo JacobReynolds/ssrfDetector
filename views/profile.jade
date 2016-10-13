@@ -7,7 +7,7 @@ block content
 	h1#hello hello #{user.username}
 	if user.domain != null
 		h2.text-center Your current Detector domain is
-			strong &nbsp;#{user.domain}
+			strong &nbsp;#{user.domain}.blinkie.xyz
 	else 
 		h2.text-center Please register a domain to begin.
 	if error && error.length > 1
