@@ -56,7 +56,9 @@ function sendReport(req, domain, ip) {
 			//If there is an error, render the error page
 			if (err) {
 				console.log("got an error: ", err);
-			} else {}
+			} else {
+				console.log("successful");
+			}
 		});
 	})
 }
