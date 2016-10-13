@@ -59,6 +59,11 @@ app.all('*', function (req, res, next) {
 
 	next();
 });
+app.all('*/*', function (req, res, next) {
+	res.locals.user = req.user || null;
+
+	next();
+});
 
 app.all('/profile/*', function (req, res, next) {
 	if (req.isAuthenticated()) {
