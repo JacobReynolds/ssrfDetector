@@ -176,9 +176,9 @@ app.post('/dashboard/deleteDetections', function (req, res, next) {
 })
 
 app.post('/profile/registerDomain', function (req, res, next) {
-	domain = req.body.domain.toLowerCase();
+	req.body.domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);
-	if (domainAlphaNumberic.test(domain)) {
+	if (domainAlphaNumberic.test(req.body.domain)) {
 		database.registerDomain(req).then(function (data) {
 				res.redirect('/profile?message=Successfully%20registered%20domain');
 			})
