@@ -301,7 +301,7 @@ exports.reportDomain = function (req, domain, report) {
 }
 
 
-exports.getReport = function (username) {
+exports.getReport = function (req, username) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('reports');
 	db.find({

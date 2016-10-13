@@ -153,7 +153,7 @@ app.post('/register', passport.authenticate('register', {
 }));
 
 app.get('/dashboard', function (req, res, next) {
-	database.getReport(req.user.username).then(function (report) {
+	database.getReport(req, req.user.username).then(function (report) {
 		res.render('dashboard', {
 			user: req.user,
 			report: report
