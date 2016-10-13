@@ -15,5 +15,6 @@ block content
 					strong IP Address
 					li= item.ip
 					strong Headers
-					li= JSON.stringify(item.headers, null, 2);
+					li
+						pre= JSON.stringify(item.headers, null, 2);
 					br
