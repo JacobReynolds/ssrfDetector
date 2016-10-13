@@ -313,7 +313,7 @@ exports.getReport = function (req, username) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
-			deferred.reject("No reports found");
+			deferred.resolve([]);
 		} else {
 			deferred.resolve(docs[0].reports);
 		}
