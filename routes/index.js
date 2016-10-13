@@ -185,7 +185,7 @@ app.get('/resetPasswordEmail', function (req, res) {
 
 app.post('/resetPasswordEmail', function (req, res, next) {
 	database.setResetLink(req).then(function (data) {
-			sendMail.sendMail('resetLink', data.email, data.resetLink);
+			sendMail.sendResetLink(data.email, data.resetLink);
 			res.render('resetPasswordEmail', {
 				message: 'Please check your email for a password reset link'
 			})
@@ -213,7 +213,6 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 app.post('/resetPasswordForm', function (req, res, next) {
 	database.resetPassword(req)
 		.then(function (message) {
-			console.log('reset .then');
 			res.render('login', {
 				message: message
 			})
@@ -240,6 +239,7 @@ app.post('/reportDomain', function (req, res) {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
 		});
+		sendMail.sendReport(req.body.domain, req.body.ip);
 		res.send("200");
 	}
 })

@@ -325,3 +325,23 @@ exports.getReport = function (req, username) {
 
 	return deferred.promise;
 }
+
+exports.getEmailFromDomain = function (req, username) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	db.find({
+		'domain': domain
+	}).toArray(function (err, docs) {
+		if (err != null) {
+			console.log("Error: " + err.body);
+			deferred.reject(err.body);
+		} else if (docs.length === 0) {
+			deferred.resolve(null);
+		} else {
+			//reversing array so recent reports are at the top
+			deferred.resolve(docs[0].email);
+		}
+	})
+
+	return deferred.promise;
+}

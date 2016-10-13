@@ -2,9 +2,14 @@ var Mailgun = require('mailgun-js');
 var fs = require('fs');
 var creds;
 var crypto = require('crypto');
+var database = require('../misc/database.js'); //funct file contains our helper functions for our Passport and database work
 
 function resetPasswordTemplate(token) {
 	return '<html><body>Your reset link is: http://localhost:3000/resetPasswordForm/' + token + '.  Please log in and update it.';
+}
+
+function sendReportTemplate(ip) {
+	return '<html><body>SSRF has been detected from IP address: ' + ip + '.  Please log on to <a href="http://ssrfdetector.com">SSRF Detector</a> to learn more</body></html>';
 }
 var apiKey, domain, from, mailgun;
 fs.readFile(__dirname + '/../.creds/mailgun.json', 'utf8', function (err, data) {
@@ -20,14 +25,30 @@ fs.readFile(__dirname + '/../.creds/mailgun.json', 'utf8', function (err, data) 
 });
 
 
-function sendMail(template, to, link) {
-	if (template === 'resetLink') {
-		console.log('resetting link');
-		template = resetPasswordTemplate(link);
+function sendResetLink(to, link) {
+	console.log('resetting link');
+	template = resetPasswordTemplate(link);
+	var data = {
+		from: from,
+		to: to,
+		subject: 'SSRF Detector password reset',
+		html: template
+	}
+	mailgun.messages().send(data, function (err, body) {
+		//If there is an error, render the error page
+		if (err) {
+			console.log("got an error: ", err);
+		} else {}
+	});
+}
+
+function sendReport(domain, ip) {
+	database.getEmailFromDomain(domain).then(function (email) {
+		template = sendReportTemplate(ip);
 		var data = {
 			from: from,
-			to: to,
-			subject: 'SSRF Detector password reset',
+			to: email,
+			subject: 'SSRF Detected',
 			html: template
 		}
 		mailgun.messages().send(data, function (err, body) {
@@ -36,9 +57,10 @@ function sendMail(template, to, link) {
 				console.log("got an error: ", err);
 			} else {}
 		});
-	}
+	})
 }
 
 module.exports = {
-	sendMail: sendMail
+	sendResetLink: sendResetLink,
+	sendReport: sendReport
 };
