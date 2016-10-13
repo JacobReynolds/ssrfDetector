@@ -5,7 +5,7 @@ var crypto = require('crypto');
 var database = require('../misc/database.js'); //funct file contains our helper functions for our Passport and database work
 
 function resetPasswordTemplate(token) {
-	return '<html><body>Your reset link is: http://localhost:3000/resetPasswordForm/' + token + '.  Please log in and update it.';
+	return '<html><body>Your reset link is: http://ssrfdetector.com/resetPasswordForm/' + token + '.  Please log in and update it.';
 }
 
 function sendReportTemplate(ip) {
