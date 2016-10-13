@@ -164,10 +164,12 @@ app.get('/dashboard', function (req, res, next) {
 
 app.post('/dashboard/deleteDetections', function (req, res, next) {
 	database.deleteDetections(req).then(function (data) {
-			res.send(200);
+			res.redirect('/dashboard');
 		})
 		.fail(function (err) {
-			res.send(500);
+			res.render('dashboard', {
+				error: 'Error deleting Detections'
+			})
 		}).catch(next);
 })
 
