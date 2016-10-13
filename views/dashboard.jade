@@ -18,7 +18,7 @@ block content
 					li
 						pre= JSON.stringify(item.headers, null, 2)
 					br
-			button(onclick="if(confirm('Are you sure you want to delete all current Detections?')){deleteDetections();}").col-xs-12.btn.btn-danger Delete current Detections
+			button(onclick="if(confirm('Are you sure you want to delete all current Detections?')){deleteDetections();}").col-xs-10.col-xs-offset-1.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.btn.btn-danger#deleteDetections Delete current Detections
 	else
 		div.col-xs-12.text-center
 			h1 No SSRF Detections found
