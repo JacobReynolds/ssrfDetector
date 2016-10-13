@@ -16,7 +16,7 @@ var express = require('express'),
 	fs = require('fs'),
 	reportingApiKey, creds;
 
-fs.readFile(__dirname + '/../.creds/apiKey.json', 'utf8', function (err, data) {
+fs.readFile(__dirname + '/../.creds/apikey.json', 'utf8', function (err, data) {
 	if (err) throw err;
 	creds = JSON.parse(data);
 	reportingApiKey = creds.apiKey;
@@ -237,9 +237,10 @@ app.get('/logout', function (req, res) {
 });
 
 app.post('/reportDomain', function (req, res) {
+	console.log('req body: ' + JSON.stringify(req.body));
 	if (req.body.apiKey === reportingApiKey) {
 		database.reportDomain(req, req.body.domain, req.body.report);
-		res.send(200);
+		res.send("200");
 	}
 })
 
