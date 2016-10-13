@@ -156,6 +156,7 @@ exports.registerDomain = function (req) {
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			console.log('setting ' + req.user.username + '\'s domain to ' + domain);
+			req.user.domain = domain;
 			db.updateOne({
 				username: req.user.username
 			}, {
