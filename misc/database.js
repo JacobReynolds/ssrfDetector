@@ -285,7 +285,8 @@ exports.reportDomain = function (req, domain, report) {
 			}, {
 				$push: {
 					reports: report
-				}
+				},
+				$slice: -10
 			}, {
 				upsert: true
 			}, function (err, result) {
