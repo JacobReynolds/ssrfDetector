@@ -278,7 +278,7 @@ exports.reportDomain = function (req, domain, report) {
 			console.log("Error finding domain: " + domain);
 			deferred.reject("Error finding domain");
 		} else {
-			var user = docs[0].username;
+			var username = docs[0].username;
 			db = req.app.get("db").collection('reports');
 			db.updateOne({
 				'username': username

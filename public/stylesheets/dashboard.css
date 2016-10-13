@@ -19,3 +19,6 @@ span {
 .dashboardOption:hover {
 	background: #172A3A;
 }
+li {
+	list-style-type: none;
+}
