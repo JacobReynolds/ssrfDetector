@@ -17,7 +17,7 @@
 	});
 
 	function deleteDetections() {
-		$.post('/dashboard/deleteDetections', function () {
+		$.post('/dashboard/deleteDetections').then(function () {
 			reload();
 		});
 	}
