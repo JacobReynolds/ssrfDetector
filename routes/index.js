@@ -241,7 +241,7 @@ app.post('/reportDomain', function (req, res) {
 	if (req.body.apiKey === reportingApiKey) {
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
-			headers: req.body.headers
+			headers: JSON.parse(req.body.headers)
 		});
 		res.send("200");
 	}
