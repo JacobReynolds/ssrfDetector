@@ -93,7 +93,7 @@ exports.setResetLink = function (req) {
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			console.log("Error: User doesn't exist");
-			deferred.resolve(false);
+			deferred.reject(false);
 		} else {
 			crypto.randomBytes(36, function (err, buffer) {
 				resetLink = buffer.toString('hex');
