@@ -299,3 +299,24 @@ exports.reportDomain = function (req, domain, report) {
 
 	return deferred.promise;
 }
+
+
+exports.getReport = function (username) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('reports');
+	db.find({
+		'username': username
+	}).toArray(function (err, docs) {
+		if (err != null) {
+			console.log("Error: " + err.body);
+			deferred.reject(err.body);
+		} else if (docs.length === 0) {
+			console.log("Error finding reports");
+			deferred.reject("Error finding reports");
+		} else {
+			deferred.resolve(docs[0].reports);
+		}
+	})
+
+	return deferred.promise;
+}

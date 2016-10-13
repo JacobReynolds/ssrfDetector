@@ -9,3 +9,6 @@ block content
 			div.alert.alert-danger.text-center.message= error
 	if message && message.length > 1
 			div.alert.alert-success.text-center.message= message
+	if report && report != null
+			each item in report
+				li = item.ip

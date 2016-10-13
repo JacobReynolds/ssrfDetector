@@ -152,10 +152,13 @@ app.post('/register', passport.authenticate('register', {
 	failureFlash: true
 }));
 
-app.get('/dashboard', function (req, res) {
-	res.render('dashboard', {
-		user: req.user
-	});
+app.get('/dashboard', function (req, res, next) {
+	database.getReport(req.user.username).then(function (report) {
+		res.render('dashboard', {
+			user: req.user,
+			report: report
+		});
+	}).catch(next);
 });
 
 app.post('/profile/registerDomain', function (req, res, next) {
