@@ -9,7 +9,8 @@ a {
 	color: #00B7FF;
 }
 #header {
-	width: 100vw;
+	/*15px for logo margin*/
+	width: calc(100vw - 15px);
 	height: 100px;
 	background: #508991;
 	color: #FFFFFA;
