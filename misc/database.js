@@ -284,8 +284,10 @@ exports.reportDomain = function (req, domain, report) {
 				'username': username
 			}, {
 				$push: {
-					reports: report,
-					$slice: -10
+					reports: {
+						$each: [report],
+						$slice: -10
+					}
 				}
 			}, {
 				upsert: true
