@@ -264,3 +264,37 @@ exports.updatePassword = function (req) {
 
 	return deferred.promise;
 }
+exports.reportDomain = function (req, domain, report) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	db.find({
+		'domain': domain
+	}).toArray(function (err, docs) {
+		if (err != null) {
+			console.log("Error: " + err.body);
+			deferred.reject(err.body);
+		} else if (docs.length === 0) {
+			console.log("Error finding domain");
+			deferred.reject("Error finding domain");
+		} else {
+			var user = docs[0].username;
+			db = req.app.get("db").collection('reports');
+			db.updateOne({
+				'username': username
+			}, {
+				$push: {
+					reports: report
+				}
+			}, function (err, result) {
+				if (err === null) {
+					deferred.resolve('Report added');
+				} else {
+					console.log("Report add FAIL:" + err.body);
+					deferred.reject(new Error(err.body));
+				}
+			});
+		}
+	})
+
+	return deferred.promise;
+}

@@ -12,7 +12,16 @@ var express = require('express'),
 	flash = require('connect-flash'),
 	crypto = require('crypto'),
 	sendMail = require('../misc/sendMail.js'),
-	database = require('../misc/database.js'); //funct file contains our helper functions for our Passport and database work
+	database = require('../misc/database.js'), //funct file contains our helper functions for our Passport and database work
+	fs = require('fs'),
+	reportingApiKey, creds;
+
+fs.readFile(__dirname + '/../.creds/apiKey.json', 'utf8', function (err, data) {
+	if (err) throw err;
+	creds = JSON.parse(data);
+	reportingApiKey = creds.apiKey;
+});
+
 
 /* GET home page. */
 var app = express();
@@ -223,6 +232,13 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 	req.session.notice = "You have successfully been logged out " + name + "!";
 });
+
+app.post('/reportDomain', function (req, res) {
+	if (req.body.apiKey === reportingApiKey) {
+		database.reportDomain(req, req.body.domain, req.body.report);
+		res.send(200);
+	}
+})
 
 
 //=======================PASSPORT CODE=======================
