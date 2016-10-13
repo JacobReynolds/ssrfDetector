@@ -14,7 +14,8 @@ var express = require('express'),
 	sendMail = require('../misc/sendMail.js'),
 	database = require('../misc/database.js'), //funct file contains our helper functions for our Passport and database work
 	fs = require('fs'),
-	reportingApiKey, creds;
+	reportingApiKey, creds,
+	favicon = require('serve-favicon');
 
 fs.readFile(__dirname + '/../.creds/apiKey.json', 'utf8', function (err, data) {
 	if (err) throw err;
@@ -25,6 +26,7 @@ fs.readFile(__dirname + '/../.creds/apiKey.json', 'utf8', function (err, data) {
 
 /* GET home page. */
 var app = express();
+app.use(favicon(__dirname + '/../favicon.ico'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
 	extended: false
