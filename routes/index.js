@@ -162,6 +162,15 @@ app.get('/dashboard', function (req, res, next) {
 	}).catch(next);
 });
 
+app.post('/dashboard/deleteDetections', function (req, res, next) {
+	database.deleteDetections(req).then(function (data) {
+			res.send(200);
+		})
+		.fail(function (err) {
+			res.send(500);
+		}).catch(next);
+})
+
 app.post('/profile/registerDomain', function (req, res, next) {
 	domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);

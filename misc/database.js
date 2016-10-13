@@ -325,3 +325,17 @@ exports.getReport = function (req, username) {
 
 	return deferred.promise;
 }
+
+
+exports.deleteDetections = function (req) {
+	var deferred = Q.defer();
+	var username = req.user.username;
+	var db = req.app.get("db").collection('reports');
+	db.deleteMany({
+		'username': username
+	}, function () {
+		deferred.resolve();
+	})
+
+	return deferred.promise;
+}

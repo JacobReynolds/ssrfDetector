@@ -15,3 +15,9 @@
 			$(".hamburger").show();
 		});
 	});
+
+	function deleteDetections() {
+		$.post('/dashboard/deleteDetections', function () {
+			reload();
+		});
+	}
