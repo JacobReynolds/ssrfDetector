@@ -311,7 +311,7 @@ exports.getReport = function (req, username) {
 	var db = req.app.get("db").collection('reports');
 	db.find({
 		'username': username
-	}).toArray(function (err, docs) {
+	}).sort([['_id', -1]]).toArray(function (err, docs) {
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
