@@ -59,11 +59,6 @@ app.all('*', function (req, res, next) {
 
 	next();
 });
-app.all('*/*', function (req, res, next) {
-	res.locals.user = req.user || null;
-
-	next();
-});
 
 app.all('/profile/*', function (req, res, next) {
 	if (req.isAuthenticated()) {
@@ -170,14 +165,13 @@ app.get('/dashboard', function (req, res, next) {
 app.post('/profile/registerDomain', function (req, res, next) {
 	domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);
-	if (domainAlphaNumberic.test(username)) {
+	if (domainAlphaNumberic.test(domain)) {
 		database.registerDomain(req).then(function (data) {
 				res.redirect('/profile?message=Successfully%20registered%20domain');
 			})
 			.fail(function (err) {
 				res.render('profile/registerDomain', {
-					error: 'Error registering domain',
-					user: req.user
+					error: 'Error registering domain'
 				})
 			}).catch(next);
 	} else {
