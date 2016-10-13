@@ -293,7 +293,7 @@ exports.reportDomain = function (req, domain, report) {
 				upsert: true
 			}, function (err, result) {
 				if (err === null) {
-					deferred.resolve('Report added');
+					deferred.resolve(docs[0].email);
 				} else {
 					console.log("Report add FAIL:" + err.body);
 					deferred.reject(new Error(err.body));
@@ -320,26 +320,6 @@ exports.getReport = function (req, username) {
 		} else {
 			//reversing array so recent reports are at the top
 			deferred.resolve(docs[0].reports.reverse());
-		}
-	})
-
-	return deferred.promise;
-}
-
-exports.getEmailFromDomain = function (req, domain) {
-	var deferred = Q.defer();
-	var db = req.app.get("db").collection('users');
-	db.find({
-		'domain': domain
-	}).toArray(function (err, docs) {
-		if (err != null) {
-			console.log("Error: " + err.body);
-			deferred.reject(err.body);
-		} else if (docs.length === 0) {
-			deferred.resolve(null);
-		} else {
-			//reversing array so recent reports are at the top
-			deferred.resolve(docs[0].email);
 		}
 	})
 

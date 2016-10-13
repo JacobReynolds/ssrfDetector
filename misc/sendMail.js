@@ -2,7 +2,6 @@ var Mailgun = require('mailgun-js');
 var fs = require('fs');
 var creds;
 var crypto = require('crypto');
-var database = require('../misc/database.js'); //funct file contains our helper functions for our Passport and database work
 
 function resetPasswordTemplate(token) {
 	return '<html><body>Your reset link is: http://ssrfdetector.com/resetPasswordForm/' + token + '.  Please log in and update it.';
@@ -42,24 +41,22 @@ function sendResetLink(to, link) {
 	});
 }
 
-function sendReport(req, domain, ip) {
-	database.getEmailFromDomain(req, domain).then(function (email) {
-		console.log('email: ' + email);
-		template = sendReportTemplate(ip);
-		var data = {
-			from: from,
-			to: email,
-			subject: 'SSRF Detected',
-			html: template
+function sendReport(req, email, domain, ip) {
+	console.log('Sending report to: ' + email);
+	template = sendReportTemplate(ip);
+	var data = {
+		from: from,
+		to: email,
+		subject: 'SSRF Detected',
+		html: template
+	}
+	mailgun.messages().send(data, function (err, body) {
+		//If there is an error, render the error page
+		if (err) {
+			console.log("got an error: ", err);
+		} else {
+			console.log("successful");
 		}
-		mailgun.messages().send(data, function (err, body) {
-			//If there is an error, render the error page
-			if (err) {
-				console.log("got an error: ", err);
-			} else {
-				console.log("successful");
-			}
-		});
 	})
 }
 

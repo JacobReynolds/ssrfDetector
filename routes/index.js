@@ -235,9 +235,10 @@ app.post('/reportDomain', function (req, res) {
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
-		});
-		sendMail.sendReport(req, req.body.domain, req.body.ip);
-		res.send("200");
+		}).then(function (email) {
+			sendMail.sendReport(req, email, req.body.domain, req.body.ip);
+			res.send("200");
+		})
 	}
 })
 
