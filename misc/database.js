@@ -312,14 +312,14 @@ exports.getReport = function (req, username) {
 	db.find({
 		'username': username
 	}).toArray(function (err, docs) {
-		docs = docs.sort([['_id', -1]]);
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			deferred.resolve([]);
 		} else {
-			deferred.resolve(docs[0].reports);
+			//reversing array so recent reports are at the top
+			deferred.resolve(docs[0].reports.reverse());
 		}
 	})
 
