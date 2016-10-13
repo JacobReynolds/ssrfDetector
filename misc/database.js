@@ -326,7 +326,7 @@ exports.getReport = function (req, username) {
 	return deferred.promise;
 }
 
-exports.getEmailFromDomain = function (req, username) {
+exports.getEmailFromDomain = function (req, domain) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
 	db.find({

@@ -239,7 +239,7 @@ app.post('/reportDomain', function (req, res) {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
 		});
-		sendMail.sendReport(req.body.domain, req.body.ip);
+		sendMail.sendReport(req, req.body.domain, req.body.ip);
 		res.send("200");
 	}
 })

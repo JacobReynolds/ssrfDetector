@@ -42,8 +42,9 @@ function sendResetLink(to, link) {
 	});
 }
 
-function sendReport(domain, ip) {
-	database.getEmailFromDomain(domain).then(function (email) {
+function sendReport(req, domain, ip) {
+	database.getEmailFromDomain(req, domain).then(function (email) {
+		console.log('email: ' + email);
 		template = sendReportTemplate(ip);
 		var data = {
 			from: from,
