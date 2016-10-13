@@ -5,17 +5,16 @@ block append headExtender
 	
 block content
 	h1#hello hello #{user.username}
+	if user.domain != null
+		h2.text-center Your current Detector domain is
+			strong &nbsp;#{user.domain}
+	else 
+		h2.text-center Please register a domain to begin.
 	if error && error.length > 1
 			div.alert.alert-danger.text-center.message= error
 	if message && message.length > 1
 			div.alert.alert-success.text-center.message= message
-	form(action="/profile/updatePassword", method="post").col-xs-12.col-sm-8.col-sm-offset-2.col-md-4.col-md-offset-4
-		input(type="password", name="password", placeholder="Current password").col-xs-12
-		input(type="password", name="newPassword", placeholder="New password").col-xs-12
-		input(type="password", name="newPasswordConfirm", placeholder="Confirm new password").col-xs-12
-		input(type="submit").btn.btn-success.col-xs-12
-	form(action="/profile/registerDomain", method="post").col-xs-12.col-md-8.col-mg-offset-2.col-lg-4.col-lg-offset-4.text-center#registerDomain
-		input(type="text", placeholder="subdomain", name="domain", style="display: inline-block").form-control
-		span .jakereynolds.co
+	div.text-center
+		a(href="/profile/changePassword"). Change password
 		br
-		input(type="submit")
+		a(href="/profile/registerDomain") Register domain

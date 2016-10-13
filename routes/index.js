@@ -106,11 +106,12 @@ app.get('/login', function (req, res) {
 
 app.get('/profile', function (req, res) {
 	res.render('profile', {
-		user: req.user
+		user: req.user,
+		domain: req.user.domain
 	});
 });
 
-app.post('/profile/updatePassword', function (req, res, next) {
+app.post('/profile/changePassword', function (req, res, next) {
 	database.updatePassword(req).then(function (data) {
 			res.render('profile', {
 				message: data
@@ -121,6 +122,9 @@ app.post('/profile/updatePassword', function (req, res, next) {
 				error: err
 			});
 		}).catch(next);
+})
+app.get('/profile/changePassword', function (req, res, next) {
+	res.render('profile/changePassword')
 })
 
 app.post('/login', passport.authenticate('login', {
@@ -153,11 +157,15 @@ app.post('/profile/registerDomain', function (req, res, next) {
 			})
 		})
 		.fail(function (err) {
-			res.render('dashboard', {
+			res.render('profile/registerDomain', {
 				error: 'Error registering domain',
 				user: req.user
 			})
 		}).catch(next);
+})
+
+app.get('/profile/registerDomain', function (req, res, next) {
+	res.render('profile/registerDomain');
 })
 
 //Page for requesting a password reset email
