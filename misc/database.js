@@ -286,6 +286,8 @@ exports.reportDomain = function (req, domain, report) {
 				$push: {
 					reports: report
 				}
+			}, {
+				upsert: true
 			}, function (err, result) {
 				if (err === null) {
 					deferred.resolve('Report added');
