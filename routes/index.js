@@ -116,7 +116,8 @@ app.get('/login', function (req, res) {
 app.get('/profile', function (req, res) {
 	res.render('profile', {
 		user: req.user,
-		domain: req.user.domain
+		domain: req.user.domain,
+		message: req.query.message
 	});
 });
 
@@ -163,10 +164,7 @@ app.get('/dashboard', function (req, res, next) {
 
 app.post('/profile/registerDomain', function (req, res, next) {
 	database.registerDomain(req).then(function (data) {
-			res.render('dashboard', {
-				message: 'Domain registered',
-				user: req.user
-			})
+			res.redirect('/profile?message=Successfully%20registered%20domain');
 		})
 		.fail(function (err) {
 			res.render('profile/registerDomain', {
