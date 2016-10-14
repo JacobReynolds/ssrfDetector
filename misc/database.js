@@ -364,8 +364,8 @@ exports.deleteAccount = function (req) {
 	}, function (err, result) {
 		if (err === null) {
 			db = req.app.get('db').collection('reports');
-			db.deleteOne({
-				'domain': req.user.domain
+			db.deleteMany({
+				'username': req.user.username
 			}, function (err, result) {
 				if (err === null) {
 					deferred.resolve();
