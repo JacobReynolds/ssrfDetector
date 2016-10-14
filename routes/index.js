@@ -66,9 +66,7 @@ app.all('/profile/*', function (req, res, next) {
 	if (req.isAuthenticated()) {
 		next();
 	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
+		res.redirect('/login?error=Please%20log%20in');
 	}
 })
 
@@ -109,10 +107,14 @@ app.get('/', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-	res.render('login', {
-		message: req.query.message,
-		error: req.query.error,
-	});
+	if (req.query.message || req.query.error) {
+		res.render('login', {
+			message: req.query.message,
+			error: req.query.error,
+		});
+	} else {
+		res.render('login');
+	}
 });
 
 app.get('/profile', function (req, res) {
@@ -124,16 +126,36 @@ app.get('/profile', function (req, res) {
 });
 
 app.post('/profile/changePassword', function (req, res, next) {
-	database.updatePassword(req).then(function (data) {
-			res.render('profile', {
-				message: data
-			})
+	database.updateEmail(req).then(function (data) {
+			res.redirect('profile?message=Password%20successfully%20updated')
 		})
 		.fail(function (err) {
 			res.render('profile/changePassword', {
 				error: err
 			});
 		}).catch(next);
+})
+
+app.get('/profile/changeEmail', function (req, res) {
+	res.render('profile/changeEmail');
+})
+
+app.post('/profile/changeEmail', function (req, res, next) {
+	var emailRegex = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
+	if (emailRegex.test(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
+		database.updateEmail(req).then(function (data) {
+				res.redirect('/profile?message=Email%20successfully%20updated')
+			})
+			.fail(function (err) {
+				res.render('profile/changeEmail', {
+					error: err
+				});
+			}).catch(next);
+	} else {
+		res.render('profile/changeEmail', {
+			error: 'Incorrect information supplied'
+		})
+	}
 })
 app.get('/profile/changePassword', function (req, res, next) {
 	res.render('profile/changePassword')
@@ -149,11 +171,31 @@ app.get('/register', function (req, res) {
 	res.render('register');
 });
 
-app.post('/register', passport.authenticate('register', {
-	successRedirect: '/dashboard',
-	failureRedirect: '/register',
-	failureFlash: true
-}));
+app.post('/register', function (req, res, next) {
+	username = req.body.username.toLowerCase();
+	password = req.body.password;
+	var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
+	if (userAlphaNumeric.test(username)) {
+		database.localReg(req, username, password)
+			.then(function (user) {
+				console.log("REGISTERED: " + user.username);
+				sendMail.sendEmailConfirmation(user.email, user.confirmationLink);
+				//Log them out and send them to sign on
+				res.render('register', {
+					message: 'Please check your email for a confirmation URL'
+				})
+			})
+			.fail(function (err) {
+				res.render('register', {
+					error: err
+				})
+			}).catch(next);
+	} else {
+		res.render('register', {
+			error: 'Username can only be A-Za-z0-9'
+		})
+	}
+});
 
 app.get('/dashboard', function (req, res, next) {
 	database.getReport(req, req.user.username).then(function (report) {
@@ -230,6 +272,16 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 		}).catch(next);
 });
 
+app.get('/confirmEmail/:confirmationLink', function (req, res, next) {
+	database.confirmationLink(req, req.params.confirmationLink)
+		.then(function (link) {
+			res.redirect('/login?message=Please%20sign%20in');
+		})
+		.fail(function (err) {
+			res.redirect('/login?error=Error%20confirming%20email');
+		}).catch(next);
+});
+
 app.post('/resetPasswordForm', function (req, res, next) {
 	database.resetPassword(req)
 		.then(function (message) {
@@ -256,7 +308,7 @@ app.post('/reportDomain', function (req, res) {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
 		}).then(function (email) {
-			sendMail.sendReport(req, email, req.body.domain, req.body.ip);
+			sendMail.sendReport(email, req.body.domain, req.body.ip);
 			res.send("200");
 		})
 	}
@@ -290,41 +342,9 @@ passport.use('login', new LocalStrategy({
 				}
 			})
 			.fail(function (err) {
-				req.session.error = 'Error. Please try again.'; //inform user could not log them in
+				req.session.error = err; //inform user could not log them in
+				done(null, null)
 			});
-	}
-));
-
-// Use the LocalStrategy within Passport to register/"signup" users.
-passport.use('register', new LocalStrategy({
-		passReqToCallback: true
-	}, //allows us to pass back the request to the callback
-	function (req, username, password, done) {
-		username = username.toLowerCase();
-		var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
-		if (userAlphaNumeric.test(username)) {
-			database.localReg(req, username, password)
-				.then(function (user) {
-					if (user === "exists") {
-						console.log("COULD NOT REGISTER");
-						req.session.error = 'Username or email not available';
-						done(null, null);
-					} else if (user === "passMismatch") {
-						console.log("Password mismatch");
-						req.session.error = 'Passwords must match';
-						done(null, null);
-					} else if (user) {
-						console.log("REGISTERED: " + user.username);
-						done(null, user);
-					}
-				})
-				.fail(function (err) {
-					console.log(err);
-				});
-		} else {
-			req.session.error = 'Username can only be A-Za-z0-9';
-			done(null, null);
-		}
 	}
 ));
 

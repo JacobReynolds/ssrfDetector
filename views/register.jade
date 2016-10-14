@@ -10,4 +10,6 @@ block content
 		input(type="password" placeholder="Confirm Password" name="passwordConfirm").form-control
 		if error && error.length > 1
 			div.alert.alert-danger= error
+		if message && message.length > 1
+			div.alert.alert-success= message
 		input(type="submit" placeholder="Submit").form-control.btn.btn-success

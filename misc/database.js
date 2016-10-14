@@ -9,43 +9,47 @@ exports.localReg = function (req, username, password) {
 	var passwordConfirm = req.body.passwordConfirm;
 	var email = req.body.email;
 	var hash = bcrypt.hashSync(password, 8);
-	var user = {
-		"username": username,
-		"password": hash,
-		"email": email,
-		"avatar": "http://placepuppy.it/images/homepage/Beagle_puppy_6_weeks.JPG"
-	}
-	var users = req.app.get("db").collection('users');
-	//check if username is already assigned in our database
-	users.find({
-		$or: [{
-			username: username
-	}, {
-			email: email
-	}]
-	}).toArray(function (err, docs) {
-		if (err != null) {
-			console.log('Error: ' + err.body);
-			deferred.reject(new Error(err.body)); //username already exists
+	crypto.randomBytes(36, function (err, buffer) {
+		confirmationLink = buffer.toString('hex');
+		var user = {
+			"username": username,
+			"password": hash,
+			"email": email,
+			"confirmationLink": confirmationLink
 		}
-		if (docs.length != 0) {
-			console.log('username already exists');
-			deferred.resolve("exists"); //username already exists
-		} else {
-			console.log('Username is free for use');
-			if (password != passwordConfirm) {
-				deferred.resolve("passMismatch");
-			} else {
-				users.insertOne(user, function (err, result) {
-					if (err === null) {
-						deferred.resolve(user);
-					} else {
-						console.log("PUT FAIL:" + err.body);
-						deferred.reject(new Error(err.body));
-					}
-				});
+		var users = req.app.get("db").collection('users');
+		//check if username is already assigned in our database
+		users.find({
+			$or: [{
+				username: username
+				}, {
+				email: email
+				}]
+		}).toArray(function (err, docs) {
+			if (err != null) {
+				console.log('Error: ' + err.body);
+				deferred.reject(err.body); //username already exists
 			}
-		}
+			if (docs.length != 0) {
+				console.log('username already exists');
+				deferred.reject("Username or Email already taken"); //username already exists
+			} else {
+				console.log('Username is free for use');
+				if (password != passwordConfirm) {
+					deferred.reject("Passwords do not match");
+				} else {
+					users.insertOne(user, function (err, result) {
+						if (err === null) {
+							user.confirmationLink = confirmationLink;
+							deferred.resolve(user);
+						} else {
+							console.log("PUT FAIL:" + err.body);
+							deferred.reject("Error saving user details, please try again");
+						}
+					});
+				}
+			}
+		})
 	})
 	return deferred.promise;
 };
@@ -65,14 +69,18 @@ exports.localAuth = function (req, username, password) {
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			console.log("Error: User doesn't exist");
-			deferred.resolve(false);
+			deferred.reject("Incorrect username or password");
 		} else {
 			var hash = docs[0].password;
 			if (bcrypt.compareSync(password, hash)) {
-				deferred.resolve(docs[0]);
+				if (docs[0].confirmationLink != null) {
+					deferred.reject("Please check your email and confirm your account");
+				} else {
+					deferred.resolve(docs[0]);
+				}
 			} else {
 				console.log("PASSWORDS NOT MATCH");
-				deferred.resolve(false);
+				deferred.reject("Incorrect username or password");
 			}
 		}
 	})
@@ -265,6 +273,7 @@ exports.updatePassword = function (req) {
 
 	return deferred.promise;
 }
+
 exports.reportDomain = function (req, domain, report) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
@@ -326,6 +335,27 @@ exports.getReport = function (req, username) {
 	return deferred.promise;
 }
 
+exports.confirmationLink = function (req, confirmationLink) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	db.updateOne({
+		'confirmationLink': confirmationLink
+	}, {
+		$set: {
+			'confirmationLink': null
+		}
+	}, function (err, result) {
+		if (err === null) {
+			deferred.resolve();
+		} else {
+			console.log("confirmationLink FAIL:" + err.body);
+			deferred.reject("Error confirming link");
+		}
+	});
+
+	return deferred.promise;
+}
+
 
 exports.deleteDetections = function (req) {
 	var deferred = Q.defer();
@@ -337,5 +367,47 @@ exports.deleteDetections = function (req) {
 		deferred.resolve();
 	})
 
+	return deferred.promise;
+}
+
+exports.updateEmail = function (req) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	var username = req.user.username;
+	var newEmail = req.body.newEmail;
+	db.find({
+		'email': newEmail
+	}).toArray(function (err, docs) {
+		if (docs.length === 0) {
+			db.find({
+				'username': username
+			}).toArray(function (err, docs) {
+				if (err != null) {
+					console.log("Error: " + err.body);
+					deferred.reject(err.body);
+				} else if (docs.length === 0) {
+					console.log("Error confirming user");
+					deferred.reject("Error confirming user");
+				} else {
+					db.updateOne({
+						'username': username
+					}, {
+						$set: {
+							email: newEmail
+						}
+					}, function (err, result) {
+						if (err === null) {
+							deferred.resolve('Email reset');
+						} else {
+							console.log("Reset email FAIL:" + err.body);
+							deferred.reject(new Error(err.body));
+						}
+					});
+				}
+			})
+		} else {
+			deferred.reject('Email taken');
+		}
+	})
 	return deferred.promise;
 }

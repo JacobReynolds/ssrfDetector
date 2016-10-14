@@ -1,0 +1,16 @@
+extends ../layout
+block append headExtender
+	link(rel='stylesheet', href='/stylesheets/dashboard.css')
+	link(rel='stylesheet', href='/stylesheets/forms.css')
+	
+block content
+	h1#hello hello #{user.username}
+	if error && error.length > 1
+			div.alert.alert-danger.text-center.message= error
+	if message && message.length > 1
+			div.alert.alert-success.text-center.message= message
+	form(action="/profile/changeEmail", method="post").col-xs-12.col-sm-8.col-sm-offset-2.col-md-4.col-md-offset-4
+		input(type="email", name="email", placeholder="Current email", autofocus).col-xs-12
+		input(type="email", name="newEmail", placeholder="New email").col-xs-12
+		input(type="email", name="newEmailConfirm", placeholder="Confirm new email").col-xs-12
+		input(type="submit").btn.btn-success.col-xs-12
