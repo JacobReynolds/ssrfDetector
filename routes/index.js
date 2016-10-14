@@ -141,8 +141,7 @@ app.get('/profile/changeEmail', function (req, res) {
 })
 
 app.post('/profile/changeEmail', function (req, res, next) {
-	var emailRegex = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
-	if (emailRegex.test(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
+	if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
 		database.updateEmail(req).then(function (data) {
 				res.redirect('/profile?message=Email%20successfully%20updated')
 			})
@@ -175,7 +174,7 @@ app.post('/register', function (req, res, next) {
 	username = req.body.username.toLowerCase();
 	password = req.body.password;
 	var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
-	if (userAlphaNumeric.test(username)) {
+	if (userAlphaNumeric.test(username) && verifyEmailRegex(req.body.email)) {
 		database.localReg(req, username, password)
 			.then(function (user) {
 				console.log("REGISTERED: " + user.username);
@@ -192,7 +191,7 @@ app.post('/register', function (req, res, next) {
 			}).catch(next);
 	} else {
 		res.render('register', {
-			error: 'Username can only be A-Za-z0-9'
+			error: 'Invalid username or email'
 		})
 	}
 });
@@ -261,12 +260,12 @@ app.post('/resetPasswordEmail', function (req, res, next) {
 	database.setResetLink(req).then(function (data) {
 			sendMail.sendResetLink(data.email, data.resetLink);
 			res.render('resetPasswordEmail', {
-				message: 'Please check your email for a password reset link'
+				message: 'If the email address is registered, a reset link will be sent to it'
 			})
 		})
 		.fail(function (err) {
 			res.render('resetPasswordEmail', {
-				error: 'Error sending password reset email'
+				message: 'If the email address is registered, a reset link will be sent to it'
 			})
 		}).catch(next);
 })
@@ -359,5 +358,14 @@ passport.use('login', new LocalStrategy({
 			});
 	}
 ));
+
+function verifyEmailRegex(email) {
+	var emailRegex = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
+	if (emailRegex.test(email)) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 module.exports = app;

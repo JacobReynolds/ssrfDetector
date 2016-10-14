@@ -29,6 +29,7 @@ li {
 	font-size: 24px;
 	height: 75px;
 }
-#profileButtons form {
+#profileButtons #deleteForm {
+	margin-top: 50px;
 	padding: 0px;
 }
