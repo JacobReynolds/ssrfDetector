@@ -127,7 +127,7 @@ app.get('/profile', function (req, res) {
 
 app.post('/profile/changePassword', function (req, res, next) {
 	database.updatePassword(req).then(function (data) {
-			res.redirect('profile?message=Password%20successfully%20updated')
+			res.redirect('/profile?message=Password%20successfully%20updated')
 		})
 		.fail(function (err) {
 			res.render('profile/changePassword', {
