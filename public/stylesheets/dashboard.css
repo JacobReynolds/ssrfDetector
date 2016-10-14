@@ -7,6 +7,7 @@ span {
 .dashboardOption {
 	text-align: center;
 	font-size: 24px;
+	-webkit-transition: background .5s ease;
 	transition: background .5s ease;
 	line-height: 75px;
 	padding: 0px;

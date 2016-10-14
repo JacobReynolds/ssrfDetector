@@ -36,6 +36,7 @@ a {
 .navOption {
 	text-align: center;
 	font-size: 24px;
+	-webkit-transition: background .5s ease;
 	transition: background .5s ease;
 	line-height: 100px;
 	padding: 0px;
@@ -88,6 +89,7 @@ a {
 	z-index: 10000000000000;
 	/*Javascript sets it to opacity 1 on load, but this prevents it from flashing*/
 	opacity: 0;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
 }
 .mobileMenu {
 	z-index: 1000000;
@@ -100,6 +102,7 @@ a {
 	text-align: center;
 	/*Javascript sets it to opacity 1 on load, but this prevents it from flashing*/
 	opacity: 0;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
 }
 .mobileMenu ul {
 	margin: 0;
