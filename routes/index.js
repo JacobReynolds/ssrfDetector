@@ -217,6 +217,18 @@ app.post('/dashboard/deleteDetections', function (req, res, next) {
 		}).catch(next);
 })
 
+app.post('/dashboard/deleteAccount', function (req, res, next) {
+	database.deleteAccount(req).then(function (data) {
+			req.logout();
+			res.redirect('/');
+		})
+		.fail(function (err) {
+			res.render('dashboard', {
+				error: 'Error deleting account'
+			})
+		}).catch(next);
+})
+
 app.post('/profile/registerDomain', function (req, res, next) {
 	req.body.domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);

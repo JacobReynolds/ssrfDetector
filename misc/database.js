@@ -356,6 +356,33 @@ exports.confirmationLink = function (req, confirmationLink) {
 	return deferred.promise;
 }
 
+exports.deleteAccount = function (req) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('users');
+	db.deleteOne({
+		'username': req.user.username
+	}, function (err, result) {
+		if (err === null) {
+			db = req.app.get('db').collection('reports');
+			db.deleteOne({
+				'domain': req.user.domain
+			}, function (err, result) {
+				if (err === null) {
+					deferred.resolve();
+				} else {
+					console.log("confirmationLink FAIL:" + err.body);
+					deferred.reject("Error confirming link");
+				}
+			});
+		} else {
+			console.log("delete account FAIL:" + err.body);
+			deferred.reject("Error deleting account");
+		}
+	});
+
+	return deferred.promise;
+}
+
 
 exports.deleteDetections = function (req) {
 	var deferred = Q.defer();

@@ -18,3 +18,5 @@ block content
 		button(onclick="window.location.href='/profile/changePassword'").btn.btn-primary.col-xs-12 Change password
 		button(onclick="window.location.href='/profile/changeEmail'").btn.btn-primary.col-xs-12 Change email
 		button(onclick="window.location.href='/profile/registerDomain'").btn.btn-primary.col-xs-12 Register domain
+		form(action="/dashboard/deleteAccount", method="POST", onsubmit="return confirm('Are you sure you want to delete your account?')").col-xs-12
+				button(type="submit").col-xs-12.btn.btn-danger#deleteDetections Delete account
