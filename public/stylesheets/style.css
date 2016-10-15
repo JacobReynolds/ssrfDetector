@@ -12,16 +12,14 @@ a {
 .alert {
 	font-size: 24px;
 }
-input {
-	font-family: 'Muli', sans-serif;
-	font-weight: 300;
-}
+
+/*WTF?!*/
+
+li,
+button,
+input,
 input[type='submit'] {
-	font-family: 'Muli', sans-serif;
-	font-weight: 300;
-}
-button {
-	font-family: 'Muli', sans-serif;
+	font-family: 'Raleway', sans-serif;
 	font-weight: 300;
 }
 h1 {
@@ -175,11 +173,19 @@ h1 {
 		width: calc(16.66666667% - 16.66px);
 	}
 }
+@media (max-width: 1000px) {
+	.navOption {
+		font-size: 22px;
+	}
+}
 @media (max-width: 768px) {
 	#mainNav {
 		display: none;
 	}
 	#mobileNav {
 		display: block;
+	}
+	#indexHeader h1 {
+		font-size: 48px;
 	}
 }

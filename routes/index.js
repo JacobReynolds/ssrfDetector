@@ -170,7 +170,15 @@ app.post('/register', function (req, res, next) {
 	username = req.body.username.toLowerCase();
 	password = req.body.password;
 	var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
-	if (userAlphaNumeric.test(username) && verifyEmailRegex(req.body.email)) {
+	if (username.length > 16) {
+		res.render('register', {
+			error: 'Username must be 16 characters or less'
+		})
+	} else if (req.body.email.length > 254) {
+		res.render('register', {
+			error: 'Email must be 254 characters or less'
+		})
+	} else if (userAlphaNumeric.test(username) && verifyEmailRegex(req.body.email)) {
 		database.localReg(req, username, password)
 			.then(function (user) {
 				console.log("REGISTERED: " + user.username);
@@ -227,7 +235,11 @@ app.post('/dashboard/deleteAccount', function (req, res, next) {
 app.post('/profile/registerDomain', function (req, res, next) {
 	req.body.domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);
-	if (domainAlphaNumberic.test(req.body.domain)) {
+	if (req.body.domain.length > 6) {
+		res.render('profile/registerDomain', {
+			error: 'Domain must be 6 characters or less'
+		})
+	} else if (domainAlphaNumberic.test(req.body.domain)) {
 		database.registerDomain(req).then(function (data) {
 				res.redirect('/profile?message=Successfully%20registered%20domain');
 			})

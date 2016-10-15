@@ -34,3 +34,13 @@ li {
 	margin-top: 50px;
 	padding: 0px;
 }
+@media (max-width: 700px) {
+	#deleteDetections {
+		font-size: 16px;
+		word-break: break-all;
+	}
+	#hello {
+		font-size: 40px;
+		word-break: break-all;
+	}
+}
