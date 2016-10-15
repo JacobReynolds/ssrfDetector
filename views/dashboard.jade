@@ -11,7 +11,9 @@ block content
 			div.alert.alert-success.text-center.message= message
 	if report && report.length > 0
 			div.col-xs-12.text-center
-				h2.dashboardH2 Detections:
+				h2.dashboardH2
+					strong
+						10 Most Recent Detections
 			each item in report
 				div.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.detection
 					strong IP Address
@@ -28,4 +30,4 @@ block content
 			if user.domain == null
 				h2 Please 
 					a(href="/dashboard/registerDomain")
-						register a domain to begin.
+						| register a domain to begin.
