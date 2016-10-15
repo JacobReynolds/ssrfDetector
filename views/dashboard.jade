@@ -4,7 +4,7 @@ block append headExtender
 	link(rel='stylesheet', href='/stylesheets/forms.css')
 	
 block content
-	h2#hello.dashboardH2 hello #{user.username}
+	h1#hello.dashboardH1 hello #{user.username}
 	if error && error.length > 1
 			div.alert.alert-danger.text-center.message= error
 	if message && message.length > 1
