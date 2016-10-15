@@ -189,7 +189,7 @@ app.post('/register', function (req, res, next) {
 				sendMail.sendEmailConfirmation(user.email, user.confirmationLink);
 				//Log them out and send them to sign on
 				res.render('register', {
-					message: 'Please check your email for a confirmation URL'
+					message: 'Please check your email for a confirmation URL.  Email may take a few minutes to deliver.'
 				})
 			})
 			.fail(function (err) {

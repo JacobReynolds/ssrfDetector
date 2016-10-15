@@ -10,6 +10,8 @@ block content
 	if message && message.length > 1
 			div.alert.alert-success.text-center.message= message
 	if report && report.length > 0
+			div.col-xs-12.text-center
+				h1.dashboardH1 Detections:
 			each item in report
 				div.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.detection
 					strong IP Address
@@ -23,3 +25,7 @@ block content
 	else
 		div.col-xs-12.text-center
 			h1.dashboardH1 No SSRF Detections found
+			if user.domain == null
+				h2 Please 
+					a(href="/dashboard/registerDomain")
+						register a domain to begin.
