@@ -14,6 +14,9 @@ span {
 	height: 75px;
 	cursor: pointer;
 }
+h2 a {
+	font-size: inherit;
+}
 .detection {
 	font-size: 24px;
 }
