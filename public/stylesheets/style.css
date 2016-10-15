@@ -7,6 +7,10 @@ body {
 	font-weight: 300;
 	overflow: scroll;
 }
+.row {
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+}
 ::-webkit-scrollbar {
 	width: 0px;
 }
