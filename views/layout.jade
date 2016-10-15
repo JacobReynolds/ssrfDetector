@@ -5,12 +5,13 @@ html
 		meta(name='viewport', content='width=device-width, initial-scale=1')
 		meta(name='theme-color', content='#ffffff')
 		link(href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css', rel='stylesheet', type='text/css')
-		link(href='https://fonts.googleapis.com/css?family=Roboto', rel='stylesheet')
+		link(href='https://fonts.googleapis.com/css?family=Raleway:300|Muli:300,400|Poppins:500', rel='stylesheet')
 		link(rel='stylesheet', href='/stylesheets/style.css')
 		block headExtender
 	body
 		div#header
-			img(src="/images/logo.png")#logo
+			a(href="/")
+				img(src="/images/logo.png")#logo
 			div#mainNav
 				div(onclick="window.location.href='/'").col-sm-4.col-xs-12.navOption Home
 				if locals.user != null

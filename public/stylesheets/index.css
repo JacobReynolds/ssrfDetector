@@ -4,3 +4,8 @@
 p {
 	font-size: 24px;
 }
+.why {
+	text-align: justify;
+	text-justify: inter-word;
+	margin-bottom: 25px;
+}

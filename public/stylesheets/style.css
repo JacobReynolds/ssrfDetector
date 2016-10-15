@@ -1,15 +1,34 @@
 html,
 body {
-	font-family: 'Roboto', sans-serif;
 	margin: 0px;
 	padding: 0px;
 	background: #FFFFFA;
+	font-family: 'Muli', sans-serif;
+	font-weight: 300;
 }
 a {
 	color: #00B7FF;
 }
+.alert {
+	font-size: 24px;
+}
+input {
+	font-family: 'Muli', sans-serif;
+	font-weight: 300;
+}
+input[type='submit'] {
+	font-family: 'Muli', sans-serif;
+	font-weight: 300;
+}
+button {
+	font-family: 'Muli', sans-serif;
+	font-weight: 300;
+}
+h1 {
+	font-family: 'Raleway', sans-serif;
+	font-size: 72px;
+}
 #header {
-	/*15px for logo margin*/
 	width: 100vw;
 	height: 100px;
 	background: #508991;
@@ -33,9 +52,12 @@ a {
 	width: 75px;
 	margin-left: 15px;
 }
+#indexHeader {
+	margin-top: 10px;
+}
 .navOption {
 	text-align: center;
-	font-size: 24px;
+	font-size: 28px;
 	-webkit-transition: background .5s ease;
 	transition: background .5s ease;
 	line-height: 100px;
