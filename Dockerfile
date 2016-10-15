@@ -1,5 +1,5 @@
 FROM node:6
-MAINTAINER Jake Reynolds <jreynoldsdev@gmail.com>
+MAINTAINER Jacob Reynolds <jreynoldsdev@gmail.com>
 
 RUN mkdir -p /usr/api
 COPY . /usr/api
