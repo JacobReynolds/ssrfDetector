@@ -29,7 +29,10 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(session({
 	secret: 'supernova',
 	saveUninitialized: true,
-	resave: true
+	resave: true,
+	cookie: {
+		maxAge: 1800000 //30 minutes
+	}
 }));
 app.use(passport.initialize());
 app.use(passport.session());
