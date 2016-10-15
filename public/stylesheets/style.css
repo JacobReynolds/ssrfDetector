@@ -5,6 +5,10 @@ body {
 	background: #FFFFFA;
 	font-family: 'Muli', sans-serif;
 	font-weight: 300;
+	overflow: scroll;
+}
+::-webkit-scrollbar {
+	width: 0px;
 }
 a {
 	color: #00B7FF;
