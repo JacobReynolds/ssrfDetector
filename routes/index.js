@@ -178,6 +178,10 @@ app.post('/register', function (req, res, next) {
 		res.render('register', {
 			error: 'Email must be 254 characters or less'
 		})
+	} else if (req.body.password.length > 48) {
+		res.render('register', {
+			error: 'Password must be 48 characters or less'
+		})
 	} else if (userAlphaNumeric.test(username) && verifyEmailRegex(req.body.email)) {
 		database.localReg(req, username, password)
 			.then(function (user) {

@@ -4,14 +4,14 @@ block append headExtender
 	link(rel='stylesheet', href='/stylesheets/forms.css')
 	
 block content
-	h1#hello hello #{user.username}
+	h1#hello.dashboardH1 hello #{user.username}
 	if error && error.length > 1
 			div.alert.alert-danger.text-center.message= error
 	if message && message.length > 1
 			div.alert.alert-success.text-center.message= message
 	if report && report.length > 0
 			each item in report
-				div.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3
+				div.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.detection
 					strong IP Address
 					li= item.ip
 					strong Headers
@@ -22,4 +22,4 @@ block content
 				button(type="submit").col-xs-12.btn.btn-danger#deleteDetections Delete current Detections
 	else
 		div.col-xs-12.text-center
-			h1 No SSRF Detections found
+			h1.dashboardH1 No SSRF Detections found
