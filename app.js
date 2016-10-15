@@ -26,7 +26,7 @@ var MongoClient = require('mongodb').MongoClient,
 	assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/ssrfDetector';
+var url = 'mongodb://' + process.env.MONGO_HOST + '/api';
 var db;
 // Use connect method to connect to the server
 MongoClient.connect(url, function (err, dbConn) {

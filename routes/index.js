@@ -17,13 +17,6 @@ var express = require('express'),
 	reportingApiKey, creds,
 	favicon = require('serve-favicon');
 
-fs.readFile(__dirname + '/../.creds/apiKey.json', 'utf8', function (err, data) {
-	if (err) throw err;
-	creds = JSON.parse(data);
-	reportingApiKey = creds.apiKey;
-});
-
-
 /* GET home page. */
 var app = express();
 app.use(favicon(__dirname + '/../favicon.ico'));
@@ -314,7 +307,7 @@ app.get('/logout', function (req, res) {
 });
 
 app.post('/reportDomain', function (req, res) {
-	if (req.body.apiKey === reportingApiKey) {
+	if (req.body.apiKey === process.env.BLINKIE_API) {
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
