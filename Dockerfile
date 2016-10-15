@@ -4,7 +4,6 @@ MAINTAINER Jake Reynolds <jreynoldsdev@gmail.com>
 RUN mkdir -p /usr/api
 COPY . /usr/api
 WORKDIR /usr/api
-RUN mkdir ./data
 RUN npm install --production
 
 ENV PORT 3000
