@@ -8,7 +8,7 @@ block content
 	if user.domain != null
 		h2.text-center Your current Detector domain is
 			strong &nbsp;#{user.domain}.blinkie.xyz
-		p SSRF Detector only supports requests to port 80 at the moment
+		h3.text-center SSRF Detector only supports requests to port 80 at the moment
 	else 
 		h2.text-center Please register a domain to begin.
 	if error && error.length > 1
