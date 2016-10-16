@@ -8,7 +8,6 @@
   "dependencies": {
     "bcryptjs": "^0.7.12",
     "body-parser": "~1.0.0",
-    "connect-flash": "^0.1.1",
     "cookie-parser": "~1.0.1",
     "debug": "~0.7.4",
     "express": "~4.0.0",
@@ -18,12 +17,6 @@
     "method-override": "^2.2.0",
     "mongodb": "^2.2.10",
     "morgan": "~1.0.0",
-    "orchestrate": "^0.3.11",
-    "passport": "^0.2.1",
-    "passport-facebook": "^1.0.3",
-    "passport-google": "^0.3.0",
-    "passport-local": "^1.0.0",
-    "passport-twitter": "^1.0.2",
     "q": "^1.0.1",
     "serve-favicon": "^2.3.0",
     "static-favicon": "~1.0.0"
