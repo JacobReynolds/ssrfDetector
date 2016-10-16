@@ -31,16 +31,13 @@ app.use(session({
 }));
 app.use(function (req, res, next) {
 	var err = req.session.error,
-		msg = req.session.notice,
-		success = req.session.success;
+		message = req.session.message;
 
 	delete req.session.error;
-	delete req.session.success;
-	delete req.session.notice;
+	delete req.session.message;
 
 	if (err) res.locals.error = err;
-	if (msg) res.locals.notice = msg;
-	if (success) res.locals.success = success;
+	if (message) res.locals.message = message;
 
 	next();
 });
