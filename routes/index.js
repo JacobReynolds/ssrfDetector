@@ -330,7 +330,7 @@ app.get('/logout', function (req, res) {
 });
 
 app.post('/reportDomain', function (req, res) {
-	if (req.body.apiKey === process.env.BLINKIE_API) {
+	if (req.body.apiKey === process.env.BLINKIE_KEY) {
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
