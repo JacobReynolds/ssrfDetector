@@ -175,7 +175,7 @@ app.post('/login', function (req, res, next) {
 });
 
 app.get('/register', function (req, res) {
-	res.render('register'. {
+	res.render('register', {
 		message: 'Please register an account'
 	});
 });
