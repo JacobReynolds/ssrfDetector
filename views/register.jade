@@ -8,7 +8,7 @@ block content
 	if message && message.length > 1
 		div.alert.alert-success= message
 	form(action="/register", method="post").col-xs-12.col-md-8.col-mg-offset-2.col-lg-4.col-lg-offset-4.text-center#register
-		input(type="email" placeholder="Email" name="email").form-control
+		input(type="email" placeholder="Email" name="email", autofocus).form-control
 		input(type="password" placeholder="Password" name="password").form-control
 		input(type="password" placeholder="Confirm Password" name="passwordConfirm").form-control
 		input(type="submit" placeholder="Submit").form-control.btn.btn-success

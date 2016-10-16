@@ -282,6 +282,7 @@ exports.reportDomain = function (req, domain, report) {
 			deferred.reject("Error finding domain");
 		} else {
 			var email = docs[0].email;
+			console.log('reporting for email: ' + email);
 			db = req.app.get("db").collection('reports');
 			db.updateOne({
 				'email': email
@@ -296,6 +297,7 @@ exports.reportDomain = function (req, domain, report) {
 				upsert: true
 			}, function (err, result) {
 				if (err === null) {
+					console.log('successful');
 					deferred.resolve(docs[0].email);
 				} else {
 					console.log("Report add FAIL:" + err.body);
