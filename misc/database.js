@@ -4,37 +4,31 @@ Q = require('q');
 //config = require('./config.js'), //config file contains all tokens and other private info
 
 //used in local-signup strategy
-exports.localReg = function (req, username, password) {
+exports.localReg = function (req, email, password) {
 	var deferred = Q.defer();
 	var passwordConfirm = req.body.passwordConfirm;
-	var email = req.body.email;
 	var hash = bcrypt.hashSync(password, 8);
 	crypto.randomBytes(36, function (err, buffer) {
 		confirmationLink = buffer.toString('hex');
 		var user = {
-			"username": username,
 			"password": hash,
 			"email": email,
 			"confirmationLink": confirmationLink
 		}
 		var users = req.app.get("db").collection('users');
-		//check if username is already assigned in our database
+		//check if email is already assigned in our database
 		users.find({
-			$or: [{
-				username: username
-				}, {
-				email: email
-				}]
+			email: email
 		}).toArray(function (err, docs) {
 			if (err != null) {
 				console.log('Error: ' + err.body);
-				deferred.reject(err.body); //username already exists
+				deferred.reject(err.body); //email already exists
 			}
 			if (docs.length != 0) {
-				console.log('username already exists');
-				deferred.reject("Username or Email already taken"); //username already exists
+				console.log('email already exists');
+				deferred.reject("Email already taken"); //email already exists
 			} else {
-				console.log('Username is free for use');
+				console.log('Email is free for use');
 				if (password != passwordConfirm) {
 					deferred.reject("Passwords do not match");
 				} else {
@@ -58,18 +52,18 @@ exports.localReg = function (req, username, password) {
 //if user exists check if passwords match (use bcrypt.compareSync(password, hash); // true where 'hash' is password in DB)
 //if password matches take into website
 //if user doesn't exist or password doesn't match tell them it failed
-exports.localAuth = function (req, username, password) {
+exports.localAuth = function (req, email, password) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
 	db.find({
-		'username': username
+		'email': email
 	}).toArray(function (err, docs) {
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			console.log("Error: User doesn't exist");
-			deferred.reject("Incorrect username or password");
+			deferred.reject("Incorrect email or password");
 		} else {
 			var hash = docs[0].password;
 			if (bcrypt.compareSync(password, hash)) {
@@ -80,7 +74,7 @@ exports.localAuth = function (req, username, password) {
 				}
 			} else {
 				console.log("PASSWORDS NOT MATCH");
-				deferred.reject("Incorrect username or password");
+				deferred.reject("Incorrect email or password");
 			}
 		}
 	})
@@ -163,10 +157,10 @@ exports.registerDomain = function (req) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
-			console.log('setting ' + req.user.username + '\'s domain to ' + domain);
-			req.user.domain = domain;
+			console.log('setting ' + req.session.user.email + '\'s domain to ' + domain);
+			req.session.user.domain = domain;
 			db.updateOne({
-				username: req.user.username
+				email: req.session.user.email
 			}, {
 				$set: {
 					domain: domain
@@ -231,12 +225,12 @@ exports.resetPassword = function (req) {
 exports.updatePassword = function (req) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
-	var username = req.user.username;
+	var email = req.session.user.email;
 	var newPassword = req.body.newPassword;
 	var newPasswordConfirm = req.body.newPasswordConfirm;
 	if (newPassword === newPasswordConfirm) {
 		db.find({
-			'username': username
+			email: email
 		}).toArray(function (err, docs) {
 			if (err != null) {
 				console.log("Error: " + err.body);
@@ -249,7 +243,7 @@ exports.updatePassword = function (req) {
 				if (bcrypt.compareSync(hashConfirm, docs[0].password)) {
 					var hash = bcrypt.hashSync(newPassword, 8);
 					db.updateOne({
-						'username': username
+						'email': email
 					}, {
 						$set: {
 							password: hash
@@ -287,10 +281,10 @@ exports.reportDomain = function (req, domain, report) {
 			console.log("Error finding domain: " + domain);
 			deferred.reject("Error finding domain");
 		} else {
-			var username = docs[0].username;
+			var email = docs[0].email;
 			db = req.app.get("db").collection('reports');
 			db.updateOne({
-				'username': username
+				'email': email
 			}, {
 				$push: {
 					reports: {
@@ -315,11 +309,11 @@ exports.reportDomain = function (req, domain, report) {
 }
 
 
-exports.getReport = function (req, username) {
+exports.getReport = function (req, email) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('reports');
 	db.find({
-		'username': username
+		'email': email
 	}).toArray(function (err, docs) {
 		if (err != null) {
 			console.log("Error: " + err.body);
@@ -360,12 +354,12 @@ exports.deleteAccount = function (req) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
 	db.deleteOne({
-		'username': req.user.username
+		'email': req.session.user.email
 	}, function (err, result) {
 		if (err === null) {
 			db = req.app.get('db').collection('reports');
 			db.deleteMany({
-				'username': req.user.username
+				'email': req.session.user.email
 			}, function (err, result) {
 				if (err === null) {
 					deferred.resolve();
@@ -386,10 +380,10 @@ exports.deleteAccount = function (req) {
 
 exports.deleteDetections = function (req) {
 	var deferred = Q.defer();
-	var username = req.user.username;
+	var email = req.session.user.email;
 	var db = req.app.get("db").collection('reports');
 	db.deleteMany({
-		'username': username
+		'email': email
 	}, function () {
 		deferred.resolve();
 	})
@@ -400,14 +394,15 @@ exports.deleteDetections = function (req) {
 exports.updateEmail = function (req) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('users');
-	var username = req.user.username;
+	var oldEmail = req.session.user.email;
 	var newEmail = req.body.newEmail;
+	//Check the database to verify email does not exist
 	db.find({
 		'email': newEmail
 	}).toArray(function (err, docs) {
 		if (docs.length === 0) {
 			db.find({
-				'username': username
+				'email': oldEmail
 			}).toArray(function (err, docs) {
 				if (err != null) {
 					console.log("Error: " + err.body);
@@ -417,7 +412,7 @@ exports.updateEmail = function (req) {
 					deferred.reject("Error confirming user");
 				} else {
 					db.updateOne({
-						'username': username
+						'email': oldEmail
 					}, {
 						$set: {
 							email: newEmail

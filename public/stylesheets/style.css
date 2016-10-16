@@ -18,7 +18,12 @@ a {
 	color: #00B7FF;
 }
 .alert {
-	font-size: 24px;
+	font-size: 30px;
+	text-align: center;
+}
+.message {
+	font-size: 30px;
+	text-align: center;
 }
 
 /*WTF?!*/
@@ -77,9 +82,6 @@ h1 {
 }
 .navOption:hover {
 	background: #172A3A;
-}
-.message {
-	font-size: 20px;
 }
 #mobileNav {
 	display: none;
@@ -195,5 +197,13 @@ h1 {
 	}
 	#indexHeader h1 {
 		font-size: 48px;
+	}
+	.alert {
+		font-size: 24px;
+		text-align: center;
+	}
+	.message {
+		font-size: 24px;
+		text-align: center;
 	}
 }

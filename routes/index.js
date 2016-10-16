@@ -4,12 +4,6 @@ var express = require('express'),
 	bodyParser = require('body-parser'),
 	methodOverride = require('method-override'),
 	session = require('express-session'),
-	passport = require('passport'),
-	LocalStrategy = require('passport-local'),
-	TwitterStrategy = require('passport-twitter'),
-	GoogleStrategy = require('passport-google'),
-	FacebookStrategy = require('passport-facebook'),
-	flash = require('connect-flash'),
 	crypto = require('crypto'),
 	sendMail = require('../misc/sendMail.js'),
 	database = require('../misc/database.js'), //funct file contains our helper functions for our Passport and database work
@@ -27,6 +21,7 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(session({
+	name: 'session',
 	secret: 'supernova',
 	saveUninitialized: true,
 	resave: true,
@@ -34,9 +29,6 @@ app.use(session({
 		maxAge: 1800000 //30 minutes
 	}
 }));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(flash());
 app.use(function (req, res, next) {
 	var err = req.session.error,
 		msg = req.session.notice,
@@ -53,13 +45,17 @@ app.use(function (req, res, next) {
 	next();
 });
 app.all('*', function (req, res, next) {
-	res.locals.user = req.user || null;
+	res.locals.user = req.session.user || null;
 
 	next();
 });
 
+function isAuthenticated(req) {
+	return req.session.user && req.session.user.email != null;
+}
+
 app.all('/profile/*', function (req, res, next) {
-	if (req.isAuthenticated()) {
+	if (isAuthenticated(req)) {
 		next();
 	} else {
 		res.redirect('/login?error=Please%20log%20in');
@@ -68,7 +64,7 @@ app.all('/profile/*', function (req, res, next) {
 
 //Should find a way to put /profile and /profile/* into one, will do later
 app.all('/profile', function (req, res, next) {
-	if (req.isAuthenticated()) {
+	if (isAuthenticated(req)) {
 		next();
 	} else {
 		res.render('login', {
@@ -78,7 +74,7 @@ app.all('/profile', function (req, res, next) {
 })
 
 app.all('/dashboard/*', function (req, res, next) {
-	if (req.isAuthenticated()) {
+	if (isAuthenticated(req)) {
 		next();
 	} else {
 		res.render('login', {
@@ -89,7 +85,7 @@ app.all('/dashboard/*', function (req, res, next) {
 
 //Should find a way to put /dashboard and /dashboard/* into one, will do later
 app.all('/dashboard', function (req, res, next) {
-	if (req.isAuthenticated()) {
+	if (isAuthenticated(req)) {
 		next();
 	} else {
 		res.render('login', {
@@ -115,8 +111,8 @@ app.get('/login', function (req, res) {
 
 app.get('/profile', function (req, res) {
 	res.render('profile', {
-		user: req.user,
-		domain: req.user.domain,
+		user: req.session.user,
+		domain: req.session.user.domain,
 		message: req.query.message
 	});
 });
@@ -156,36 +152,44 @@ app.get('/profile/changePassword', function (req, res, next) {
 	res.render('profile/changePassword')
 })
 
-app.post('/login', passport.authenticate('login', {
-	successRedirect: '/dashboard',
-	failureRedirect: '/login',
-	failureFlash: true
-}));
+app.post('/login', function (req, res, next) {
+	database.localAuth(req, req.body.email, req.body.password)
+		.then(function (user) {
+			if (user) {
+				user.username = user.email.split('@')[0];
+				req.session.user = user;
+				res.redirect('/dashboard');
+			}
+			if (!user) {
+				req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+				res.redirect('/login');
+			}
+		})
+		.fail(function (err) {
+			req.session.error = err; //inform user could not log them in
+			res.redirect('/login');
+		});
+});
 
 app.get('/register', function (req, res) {
 	res.render('register');
 });
 
 app.post('/register', function (req, res, next) {
-	username = req.body.username.toLowerCase();
 	password = req.body.password;
-	var userAlphaNumeric = new RegExp(/^[a-z0-9]+$/i);
-	if (username.length > 16) {
-		res.render('register', {
-			error: 'Username must be 16 characters or less'
-		})
-	} else if (req.body.email.length > 254) {
+	email = req.body.email;
+	if (email.length > 254) {
 		res.render('register', {
 			error: 'Email must be 254 characters or less'
 		})
-	} else if (req.body.password.length > 48) {
+	} else if (password.length > 48) {
 		res.render('register', {
 			error: 'Password must be 48 characters or less'
 		})
-	} else if (userAlphaNumeric.test(username) && verifyEmailRegex(req.body.email)) {
-		database.localReg(req, username, password)
+	} else if (verifyEmailRegex(email)) {
+		database.localReg(req, email, password)
 			.then(function (user) {
-				console.log("REGISTERED: " + user.username);
+				console.log("REGISTERED: " + user.email);
 				sendMail.sendEmailConfirmation(user.email, user.confirmationLink);
 				//Log them out and send them to sign on
 				res.render('register', {
@@ -199,15 +203,15 @@ app.post('/register', function (req, res, next) {
 			}).catch(next);
 	} else {
 		res.render('register', {
-			error: 'Invalid username or email'
+			error: 'Invalid email'
 		})
 	}
 });
 
 app.get('/dashboard', function (req, res, next) {
-	database.getReport(req, req.user.username).then(function (report) {
+	database.getReport(req, req.session.user.email).then(function (report) {
 		res.render('dashboard', {
-			user: req.user,
+			user: req.session.user,
 			report: report
 		});
 	}).catch(next);
@@ -226,7 +230,7 @@ app.post('/dashboard/deleteDetections', function (req, res, next) {
 
 app.post('/dashboard/deleteAccount', function (req, res, next) {
 	database.deleteAccount(req).then(function (data) {
-			req.logout();
+			req.session.destroy();
 			res.redirect('/');
 		})
 		.fail(function (err) {
@@ -321,7 +325,7 @@ app.post('/resetPasswordForm', function (req, res, next) {
 
 //logs user out of site, deleting them from the session, and returns to homepage
 app.get('/logout', function (req, res) {
-	req.logout();
+	req.session.destroy();
 	res.redirect('/');
 });
 
@@ -339,37 +343,6 @@ app.post('/reportDomain', function (req, res) {
 
 
 //=======================PASSPORT CODE=======================
-
-
-passport.serializeUser(function (user, done) {
-	done(null, user);
-});
-
-passport.deserializeUser(function (obj, done) {
-	done(null, obj);
-});
-
-passport.use('login', new LocalStrategy({
-		passReqToCallback: true
-	}, //allows us to pass back the request to the callback
-	function (req, username, password, done) {
-		username = username.toLowerCase();
-		database.localAuth(req, username, password)
-			.then(function (user) {
-				if (user) {
-					done(null, user);
-				}
-				if (!user) {
-					req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
-					done(null, null);
-				}
-			})
-			.fail(function (err) {
-				req.session.error = err; //inform user could not log them in
-				done(null, null)
-			});
-	}
-));
 
 function verifyEmailRegex(email) {
 	var emailRegex = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);
