@@ -331,7 +331,6 @@ app.get('/logout', function (req, res) {
 
 app.post('/reportDomain', function (req, res) {
 	if (req.body.apiKey === process.env.BLINKIE_API) {
-		console.log('valid API key');
 		database.reportDomain(req, req.body.domain, {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
@@ -339,9 +338,6 @@ app.post('/reportDomain', function (req, res) {
 			sendMail.sendReport(email, req.body.domain, req.body.ip);
 			res.send("200");
 		})
-	} else {
-		console.log('apiKey: ' + req.body.apiKey);
-		console.log('BLINKE_API: ' + process.env.BLINKIE_API)
 	}
 })
 
