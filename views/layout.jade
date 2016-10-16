@@ -38,6 +38,10 @@ html
 						else
 							a(href='/login')
 								li Login
+	if error && error.length > 1
+			div.alert.alert-danger.text-center.message= error
+	if message && message.length > 1
+			div.alert.alert-success.text-center.message= message
 		block content
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js")
 	script(src="/javascripts/layout.js")

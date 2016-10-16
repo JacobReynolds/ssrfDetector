@@ -105,15 +105,14 @@ app.get('/login', function (req, res) {
 			error: req.query.error,
 		});
 	} else {
-		res.render('login');
+		res.render('login', {
+			message: 'Please log in'
+		});
 	}
 });
 
 app.get('/profile', function (req, res) {
-	res.render('profile', {
-		user: req.session.user,
-		message: req.query.message
-	});
+	res.render('profile');
 });
 
 app.post('/profile/changePassword', function (req, res, next) {
@@ -132,7 +131,11 @@ app.get('/profile/changeEmail', function (req, res) {
 })
 
 app.post('/profile/changeEmail', function (req, res, next) {
-	if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
+	if (req.body.newEmail.length > 254) {
+		res.render('profile/changeEmail', {
+			error: 'Email must be 254 characters or less'
+		})
+	} else if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
 		database.updateEmail(req).then(function (data) {
 				req.session.user.email = req.body.newEmail;
 				res.redirect('/profile?message=Email%20successfully%20updated')
@@ -172,7 +175,9 @@ app.post('/login', function (req, res, next) {
 });
 
 app.get('/register', function (req, res) {
-	res.render('register');
+	res.render('register'. {
+		message: 'Please register an account'
+	});
 });
 
 app.post('/register', function (req, res, next) {
