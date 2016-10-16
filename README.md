@@ -1,0 +1,10 @@
+<img src="/public/images/logo.png"/>
+<h1>SSRF Detector</h1>
+This is the application source code for the <a href="https://ssrfdetector.com" target="_blank">SSRF Detector</a> website.
+
+Other parts of the application that are not included are:
+* The Blinkie NodeJS Application
+* RancherOS, which manages:
+  * MongoDB
+  * Load Balancing
+  * Node Clusters
