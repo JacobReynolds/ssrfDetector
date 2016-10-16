@@ -102,15 +102,25 @@ app.get('/profile', function (req, res) {
 });
 
 app.post('/profile/changePassword', function (req, res, next) {
-	database.updatePassword(req).then(function (data) {
-			req.session.message = "Password successfully updated";
-			res.redirect('/profile')
+	if (req.body.newPassword.length > 48) {
+		res.render('profile/changePassword', {
+			error: 'Password must be 48 characters or less.'
 		})
-		.fail(function (err) {
-			res.render('profile/changePassword', {
-				error: err
-			});
-		}).catch(next);
+	} else if (req.body.newPassword.length < 8) {
+		res.render('profile/changePassword', {
+			error: 'Password must be 8 characters or more.'
+		})
+	} else {
+		database.updatePassword(req).then(function (data) {
+				req.session.message = "Password successfully updated";
+				res.redirect('/profile')
+			})
+			.fail(function (err) {
+				res.render('profile/changePassword', {
+					error: err
+				});
+			}).catch(next);
+	}
 })
 
 app.get('/profile/changeEmail', function (req, res) {
