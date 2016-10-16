@@ -112,7 +112,6 @@ app.get('/login', function (req, res) {
 app.get('/profile', function (req, res) {
 	res.render('profile', {
 		user: req.session.user,
-		domain: req.session.user.domain,
 		message: req.query.message
 	});
 });
@@ -135,6 +134,7 @@ app.get('/profile/changeEmail', function (req, res) {
 app.post('/profile/changeEmail', function (req, res, next) {
 	if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
 		database.updateEmail(req).then(function (data) {
+				req.session.user.email = req.body.newEmail;
 				res.redirect('/profile?message=Email%20successfully%20updated')
 			})
 			.fail(function (err) {

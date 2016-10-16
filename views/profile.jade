@@ -11,7 +11,8 @@ block content
 	h1#hello hello #{user.username}
 	if user.domain != null
 		h2.text-center Your current Detector domain is
-			strong &nbsp;#{user.domain}.blinkie.xyz
+			strong 
+				|  #{user.domain}.blinkie.xyz
 		h3.text-center SSRF Detector only supports requests to port 80 at the moment
 	else 
 		h2.text-center Please register a domain to begin.
