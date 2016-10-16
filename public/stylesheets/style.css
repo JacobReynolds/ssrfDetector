@@ -19,10 +19,12 @@ a {
 }
 .alert {
 	font-size: 30px;
+	margin-top: 0px !important;
 	text-align: center;
 }
 .message {
 	font-size: 30px;
+	margin-top: 0px !important;
 	text-align: center;
 }
 

@@ -58,7 +58,8 @@ app.all('/profile/*', function (req, res, next) {
 	if (isAuthenticated(req)) {
 		next();
 	} else {
-		res.redirect('/login?error=Please%20log%20in');
+		req.session.error = "Please log in"
+		res.redirect('/login');
 	}
 })
 
@@ -67,9 +68,8 @@ app.all('/profile', function (req, res, next) {
 	if (isAuthenticated(req)) {
 		next();
 	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
+		req.session.error = "Please log in";
+		res.redirect('/login');
 	}
 })
 
@@ -77,9 +77,8 @@ app.all('/dashboard/*', function (req, res, next) {
 	if (isAuthenticated(req)) {
 		next();
 	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
+		req.session.error = "Please log in";
+		res.redirect('/login');
 	}
 })
 
@@ -88,9 +87,8 @@ app.all('/dashboard', function (req, res, next) {
 	if (isAuthenticated(req)) {
 		next();
 	} else {
-		res.render('login', {
-			error: 'Please log in'
-		});
+		req.session.error = "Please log in";
+		res.redirect('/login');
 	}
 })
 
@@ -99,16 +97,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/login', function (req, res) {
-	if (req.query.message || req.query.error) {
-		res.render('login', {
-			message: req.query.message,
-			error: req.query.error,
-		});
-	} else {
-		res.render('login', {
-			message: 'Please log in'
-		});
-	}
+	res.render('login');
 });
 
 app.get('/profile', function (req, res) {
@@ -117,7 +106,8 @@ app.get('/profile', function (req, res) {
 
 app.post('/profile/changePassword', function (req, res, next) {
 	database.updatePassword(req).then(function (data) {
-			res.redirect('/profile?message=Password%20successfully%20updated')
+			req.session.message = "Password successfully updated";
+			res.redirect('/profile')
 		})
 		.fail(function (err) {
 			res.render('profile/changePassword', {
@@ -138,7 +128,8 @@ app.post('/profile/changeEmail', function (req, res, next) {
 	} else if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
 		database.updateEmail(req).then(function (data) {
 				req.session.user.email = req.body.newEmail;
-				res.redirect('/profile?message=Email%20successfully%20updated')
+				req.session.message = "Email successfully updated";
+				res.redirect('/profile')
 			})
 			.fail(function (err) {
 				res.render('profile/changeEmail', {
@@ -175,9 +166,7 @@ app.post('/login', function (req, res, next) {
 });
 
 app.get('/register', function (req, res) {
-	res.render('register', {
-		message: 'Please register an account'
-	});
+	res.render('register');
 });
 
 app.post('/register', function (req, res, next) {
@@ -254,7 +243,8 @@ app.post('/profile/registerDomain', function (req, res, next) {
 		})
 	} else if (domainAlphaNumberic.test(req.body.domain)) {
 		database.registerDomain(req).then(function (data) {
-				res.redirect('/profile?message=Successfully%20registered%20domain');
+				req.session.message = 'Successfully registered domain';
+				res.redirect('/profile');
 			})
 			.fail(function (err) {
 				res.render('profile/registerDomain', {
@@ -300,31 +290,32 @@ app.get('/resetPasswordForm/:resetLink', function (req, res, next) {
 			})
 		})
 		.fail(function (err) {
-			res.redirect('/login?error=Expired%20or%20non-existent%20reset%20link');
+			req.session.error = "Expired or non-existent reset link"
+			res.redirect('/login');
 		}).catch(next);
 });
 
 app.get('/confirmEmail/:confirmationLink', function (req, res, next) {
 	database.confirmationLink(req, req.params.confirmationLink)
 		.then(function (link) {
-			res.redirect('/login?message=Please%20sign%20in');
+			req.session.message = "Please log in";
+			res.redirect('/login');
 		})
 		.fail(function (err) {
-			res.redirect('/login?error=Error%20confirming%20email');
+			req.session.error = "Error confirming email";
+			res.redirect('/login');
 		}).catch(next);
 });
 
 app.post('/resetPasswordForm', function (req, res, next) {
 	database.resetPassword(req)
 		.then(function (message) {
-			res.render('login', {
-				message: message
-			})
+			req.session.message = message;
+			res.redirect('/login')
 		})
 		.fail(function (err) {
-			res.render('login', {
-				errorMessage: 'Error resetting password'
-			})
+			req.session.error = "Error resetting password";
+			res.redirect('/login')
 		}).catch(next);
 });
 
