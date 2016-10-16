@@ -29,13 +29,13 @@ var MongoClient = require('mongodb').MongoClient,
 var url = 'mongodb://' + process.env.MONGO_HOST + '/api';
 var db;
 // Use connect method to connect to the server
-/*MongoClient.connect(url, function (err, dbConn) {
+MongoClient.connect(url, function (err, dbConn) {
 	assert.equal(null, err);
 	console.log("Connected successfully to server");
 
 	db = dbConn;
 	app.set('db', db);
-});*/
+});
 /// catch 404 and forwarding to error handler
 app.use(function (req, res, next) {
 	var err = new Error('Not Found');
