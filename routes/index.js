@@ -141,6 +141,7 @@ app.post('/profile/changeEmail', function (req, res, next) {
 	} else if (verifyEmailRegex(req.body.newEmail) && req.body.newEmail === req.body.newEmailConfirm) {
 		database.updateEmail(req).then(function (data) {
 				req.session.user.email = req.body.newEmail;
+				req.session.user.username = req.session.user.email.split('@')[0];
 				req.session.message = "Email successfully updated";
 				res.redirect('/profile')
 			})
@@ -182,7 +183,7 @@ app.post('/login', function (req, res, next) {
 		.catch(function (errorCodes) {
 			// invalid
 			res.render('login', {
-					message: 'Invalid captcha'
+					error: 'Invalid captcha'
 				}) // translate error codes to human readable text
 		});
 

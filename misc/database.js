@@ -399,21 +399,16 @@ exports.updateEmail = function (req) {
 	var oldEmail = req.session.user.email;
 	var newEmail = req.body.newEmail;
 	//Check the database to verify email does not exist
+	if (!oldEmail) deferred.reject("User not signed in");
 	db.find({
 		'email': newEmail
 	}).toArray(function (err, docs) {
 		if (docs.length === 0) {
-			db.find({
-				'email': oldEmail
-			}).toArray(function (err, docs) {
-				if (err != null) {
-					console.log("Error: " + err.body);
-					deferred.reject(err.body);
-				} else if (docs.length === 0) {
-					console.log("Error confirming user");
-					deferred.reject("Error confirming user");
-				} else {
-					db.updateOne({
+			if (err != null) {
+				console.log("Error: " + err.body);
+				deferred.reject(err.body);
+			} else {
+				db.updateOne({
 						'email': oldEmail
 					}, {
 						$set: {
@@ -422,13 +417,19 @@ exports.updateEmail = function (req) {
 					}, function (err, result) {
 						if (err === null) {
 							deferred.resolve('Email reset');
+							db = req.app.get('db').collections('reports');
+							//Update reports to link with new email
+							db.updateMany({
+								email: oldEmail
+							}, $set: {
+								email: newEmail
+							})
 						} else {
 							console.log("Reset email FAIL:" + err.body);
 							deferred.reject(new Error(err.body));
 						}
-					});
-				}
-			})
+					}
+				})
 		} else {
 			deferred.reject('Email taken');
 		}
