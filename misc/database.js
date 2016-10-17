@@ -322,9 +322,11 @@ exports.getReport = function (req, email) {
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
 			deferred.resolve([]);
-		} else {
+		} else if (docs[0].reports && docs[0].reports.length > 0) {
 			//reversing array so recent reports are at the top
 			deferred.resolve(docs[0].reports.reverse());
+		} else {
+			deferred.resolve([]);
 		}
 	})
 
@@ -416,16 +418,16 @@ exports.updateEmail = function (req) {
 					}
 				}, function (err, result) {
 					if (err === null) {
-						db = req.app.get('db').collections('reports');
+						db = req.app.get("db").collection('reports');
 						//Update reports to link with new email
+						console.log('oldEmail: ' + oldEmail);
+						console.log('newEmail: ' + newEmail);
 						db.update({
 							email: oldEmail
 						}, {
 							$set: {
 								email: newEmail
 							}
-						}, {
-							multi: true
 						}, function (err, result) {
 							if (err === null) {
 								deferred.resolve('Email reset');
