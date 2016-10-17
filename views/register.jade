@@ -8,4 +8,7 @@ block content
 		input(type="email" placeholder="Email" name="email", autofocus).form-control
 		input(type="password" placeholder="Password" name="password").form-control
 		input(type="password" placeholder="Confirm Password" name="passwordConfirm").form-control
+		div.g-recaptcha(data-sitekey='6LdmhwkUAAAAAL3mbSCZh4T0eA2P3kYjZDxTcC_d')
 		input(type="submit", value="Continue").form-control.btn.btn-success
+block append scripts
+	script(src='https://www.google.com/recaptcha/api.js')

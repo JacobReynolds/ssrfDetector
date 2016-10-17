@@ -177,6 +177,13 @@ h1 {
 	margin-top: 5px;
 	margin: 0 auto;
 }
+.g-recaptcha {
+	margin-top: 10px;
+}
+.g-recaptcha div {
+	margin-left: auto;
+	margin-right: auto;
+}
 @media (min-width: 768px) {
 	#header .col-sm-4 {
 		width: calc(33.33333333% - 33.33px);

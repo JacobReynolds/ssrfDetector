@@ -9,7 +9,13 @@ var express = require('express'),
 	database = require('../misc/database.js'), //funct file contains our helper functions for our Passport and database work
 	fs = require('fs'),
 	reportingApiKey, creds,
-	favicon = require('serve-favicon');
+	favicon = require('serve-favicon'),
+	reCAPTCHA = require('recaptcha2');
+
+recaptcha = new reCAPTCHA({
+	siteKey: '6LdmhwkUAAAAAL3mbSCZh4T0eA2P3kYjZDxTcC_d',
+	secretKey: process.env.RECAPTCHA_KEY
+})
 
 /* GET home page. */
 var app = express();
@@ -154,22 +160,32 @@ app.get('/profile/changePassword', function (req, res, next) {
 })
 
 app.post('/login', function (req, res, next) {
-	database.localAuth(req, req.body.email, req.body.password)
-		.then(function (user) {
-			if (user) {
-				user.username = user.email.split('@')[0];
-				req.session.user = user;
-				res.redirect('/dashboard');
-			}
-			if (!user) {
-				req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
-				res.redirect('/login');
-			}
+	recaptcha.validateRequest(req)
+		.then(function () {
+			database.localAuth(req, req.body.email.toLowerCase(), req.body.password)
+				.then(function (user) {
+					if (user) {
+						user.username = user.email.split('@')[0];
+						req.session.user = user;
+						res.redirect('/dashboard');
+					}
+					if (!user) {
+						req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+						res.redirect('/login');
+					}
+				})
+				.fail(function (err) {
+					req.session.error = err; //inform user could not log them in
+					res.redirect('/login');
+				});
 		})
-		.fail(function (err) {
-			req.session.error = err; //inform user could not log them in
-			res.redirect('/login');
+		.catch(function (errorCodes) {
+			// invalid
+			res.render('login', {
+					message: 'Invalid captcha'
+				}) // translate error codes to human readable text
 		});
+
 });
 
 app.get('/register', function (req, res) {
@@ -177,40 +193,48 @@ app.get('/register', function (req, res) {
 });
 
 app.post('/register', function (req, res, next) {
-	password = req.body.password;
-	email = req.body.email;
-	if (email.length > 254) {
-		res.render('register', {
-			error: 'Email must be 254 characters or less.'
-		})
-	} else if (password.length > 48) {
-		res.render('register', {
-			error: 'Password must be 48 characters or less.'
-		})
-	} else if (password.length < 8) {
-		res.render('register', {
-			error: 'Password must be 8 characters or more.'
-		})
-	} else if (verifyEmailRegex(email)) {
-		database.localReg(req, email, password)
-			.then(function (user) {
-				console.log("REGISTERED: " + user.email);
-				sendMail.sendEmailConfirmation(user.email, user.confirmationLink);
-				//Log them out and send them to sign on
+	recaptcha.validateRequest(req)
+		.then(function () {
+			password = req.body.password;
+			email = req.body.email.toLowerCase();
+			if (email.length > 254) {
 				res.render('register', {
-					message: 'Please check your email for a confirmation URL.  Email may take a few minutes to deliver.'
+					error: 'Email must be 254 characters or less.'
 				})
+			} else if (password.length > 48) {
+				res.render('register', {
+					error: 'Password must be 48 characters or less.'
+				})
+			} else if (password.length < 8) {
+				res.render('register', {
+					error: 'Password must be 8 characters or more.'
+				})
+			} else if (verifyEmailRegex(email)) {
+				database.localReg(req, email, password)
+					.then(function (user) {
+						console.log("REGISTERED: " + user.email);
+						sendMail.sendEmailConfirmation(user.email, user.confirmationLink);
+						//Log them out and send them to sign on
+						res.render('register', {
+							message: 'Please check your email for a confirmation URL.  Email may take a few minutes to deliver.'
+						})
+					})
+					.fail(function (err) {
+						res.render('register', {
+							error: err
+						})
+					}).catch(next);
+			} else {
+				res.render('register', {
+					error: 'Invalid email'
+				})
+			}
+		})
+		.catch(function (errorCodes) {
+			res.render('register', {
+				error: 'Invalid captcha'
 			})
-			.fail(function (err) {
-				res.render('register', {
-					error: err
-				})
-			}).catch(next);
-	} else {
-		res.render('register', {
-			error: 'Invalid email'
-		})
-	}
+		});
 });
 
 app.get('/dashboard', function (req, res, next) {
