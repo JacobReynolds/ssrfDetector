@@ -409,27 +409,35 @@ exports.updateEmail = function (req) {
 				deferred.reject(err.body);
 			} else {
 				db.updateOne({
-						'email': oldEmail
-					}, {
-						$set: {
-							email: newEmail
-						}
-					}, function (err, result) {
-						if (err === null) {
-							deferred.resolve('Email reset');
-							db = req.app.get('db').collections('reports');
-							//Update reports to link with new email
-							db.updateMany({
-								email: oldEmail
-							}, $set: {
+					email: oldEmail
+				}, {
+					$set: {
+						email: newEmail
+					}
+				}, function (err, result) {
+					if (err === null) {
+						db = req.app.get('db').collections('reports');
+						//Update reports to link with new email
+						db.updateMany({
+							email: oldEmail
+						}, {
+							$set: {
 								email: newEmail
-							})
-						} else {
-							console.log("Reset email FAIL:" + err.body);
-							deferred.reject(new Error(err.body));
-						}
+							}
+						}, function (err, result) {
+							if (err === null) {
+								deferred.resolve('Email reset');
+							} else {
+								console.log("Reset email FAIL:" + err.body);
+								deferred.reject(new Error(err.body));
+							}
+						})
+					} else {
+						console.log("Reset email FAIL:" + err.body);
+						deferred.reject(new Error(err.body));
 					}
 				})
+			}
 		} else {
 			deferred.reject('Email taken');
 		}
