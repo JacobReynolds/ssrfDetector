@@ -418,12 +418,14 @@ exports.updateEmail = function (req) {
 					if (err === null) {
 						db = req.app.get('db').collections('reports');
 						//Update reports to link with new email
-						db.updateMany({
+						db.update({
 							email: oldEmail
 						}, {
 							$set: {
 								email: newEmail
 							}
+						}, {
+							multi: true
 						}, function (err, result) {
 							if (err === null) {
 								deferred.resolve('Email reset');
