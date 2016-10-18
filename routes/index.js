@@ -161,31 +161,31 @@ app.get('/profile/changePassword', function (req, res, next) {
 })
 
 app.post('/login', function (req, res, next) {
-	//recaptcha.validateRequest(req)
-	//	.then(function () {
-	database.localAuth(req, req.body.email.toLowerCase(), req.body.password)
-		.then(function (user) {
-			if (user) {
-				user.username = user.email.split('@')[0];
-				req.session.user = user;
-				res.redirect('/dashboard');
-			}
-			if (!user) {
-				req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
-				res.redirect('/login');
-			}
+	recaptcha.validateRequest(req)
+		.then(function () {
+			database.localAuth(req, req.body.email.toLowerCase(), req.body.password)
+				.then(function (user) {
+					if (user) {
+						user.username = user.email.split('@')[0];
+						req.session.user = user;
+						res.redirect('/dashboard');
+					}
+					if (!user) {
+						req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+						res.redirect('/login');
+					}
+				})
+				.fail(function (err) {
+					req.session.error = err; //inform user could not log them in
+					res.redirect('/login');
+				});
 		})
-		.fail(function (err) {
-			req.session.error = err; //inform user could not log them in
-			res.redirect('/login');
+		.catch(function (errorCodes) {
+			// invalid
+			res.render('login', {
+					error: 'Invalid captcha'
+				}) // translate error codes to human readable text
 		});
-	//		})
-	//		.catch(function (errorCodes) {
-	//			// invalid
-	//			res.render('login', {
-	//					error: 'Invalid captcha'
-	//				}) // translate error codes to human readable text
-	//		});
 
 });
 
