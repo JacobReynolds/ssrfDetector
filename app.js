@@ -26,7 +26,7 @@ var MongoClient = require('mongodb').MongoClient,
 	assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://' + process.env.MONGO_HOST + '/api';
+var url = 'mongodb://' + process.env.MONGODB_PORT_27017_TCP_ADDR + ':' + process.env.MONGODB_PORT_27017_TCP_PORT + '/api';
 var db;
 // Use connect method to connect to the server
 MongoClient.connect(url, function (err, dbConn) {
