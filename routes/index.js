@@ -391,8 +391,6 @@ app.post('/resetRateLimits', function (req, res) {
 			res.send("200");
 		})
 	} else {
-		console.log('body: ' + req.body.apiKey);
-		console.log('sever: ' + process.env.BLINKIE_KEY);
 		res.send("500");
 	}
 })

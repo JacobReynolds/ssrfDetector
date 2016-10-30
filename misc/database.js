@@ -438,7 +438,6 @@ exports.updateEmail = function (req) {
 exports.resetRateLimits = function (req) {
 	var deferred = Q.defer();
 	var db = req.app.get("db").collection('reports');
-	console.log('in reset rate limits');
 	db.update({}, {
 		$set: {
 			'rateLimit': 0
@@ -447,7 +446,6 @@ exports.resetRateLimits = function (req) {
 		multi: true
 	}, function (err, result) {
 		if (err === null) {
-			console.log('finished resetting limits')
 			deferred.resolve();
 		} else {
 			console.log("Reset rate limit FAIL:" + err.body);
