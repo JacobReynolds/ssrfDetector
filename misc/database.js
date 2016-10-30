@@ -259,6 +259,8 @@ exports.reportDomain = function (req, domain, report) {
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
+		} else if (docs.length == 0) {
+			deferred.reject("No domain found");
 		} else {
 			db = req.app.get("db").collection('reports');
 			db.findAndModify({
@@ -309,6 +311,7 @@ exports.getReport = function (req, email) {
 		} else if (docs[0].reports && docs[0].reports.length > 0) {
 			//reversing array so recent reports are at the top
 			var rateLimit = rateLimitAmount - docs[0].rateLimit;
+			if (!Number.isInteger(rateLimit)) rateLimit = 10;
 			deferred.resolve({
 				items: docs[0].reports.reverse(),
 				rateLimit: Math.max(rateLimit, 0)
