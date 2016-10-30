@@ -229,38 +229,26 @@ exports.updatePassword = function (req) {
 	var newPassword = req.body.newPassword;
 	var newPasswordConfirm = req.body.newPasswordConfirm;
 	if (newPassword === newPasswordConfirm) {
-		db.find({
-			email: email
-		}).toArray(function (err, docs) {
-			if (err != null) {
-				console.log("Error: " + err.body);
-				deferred.reject(err.body);
-			} else if (docs.length === 0) {
-				console.log("Error confirming user");
-				deferred.reject("Error confirming user");
-			} else {
-				var hashConfirm = req.body.password;
-				if (bcrypt.compareSync(hashConfirm, docs[0].password)) {
-					var hash = bcrypt.hashSync(newPassword, 8);
-					db.updateOne({
-						'email': email
-					}, {
-						$set: {
-							password: hash
-						}
-					}, function (err, result) {
-						if (err === null) {
-							deferred.resolve('Password reset');
-						} else {
-							console.log("Reset password FAIL:" + err.body);
-							deferred.reject(new Error(err.body));
-						}
-					});
-				} else {
-					deferred.reject("Incorrect password");
+		var hashConfirm = req.body.password;
+		if (bcrypt.compareSync(hashConfirm, req.session.user.password)) {
+			var hash = bcrypt.hashSync(newPassword, 8);
+			db.updateOne({
+				'email': email
+			}, {
+				$set: {
+					password: hash
 				}
-			}
-		})
+			}, function (err, result) {
+				if (err === null) {
+					deferred.resolve('Password reset');
+				} else {
+					console.log("Reset password FAIL:" + err.body);
+					deferred.reject(new Error(err.body));
+				}
+			});
+		} else {
+			deferred.reject("Incorrect password");
+		}
 	} else {
 		deferred.reject("Passwords do not match");
 	}

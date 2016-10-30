@@ -4,6 +4,7 @@ var express = require('express'),
 	bodyParser = require('body-parser'),
 	methodOverride = require('method-override'),
 	session = require('express-session'),
+	mongoStore = require('connect-mongo')(session),
 	crypto = require('crypto'),
 	sendMail = require('../misc/sendMail.js'),
 	database = require('../misc/database.js'), //funct file contains our helper functions for our Passport and database work
@@ -17,8 +18,8 @@ recaptcha = new reCAPTCHA({
 	secretKey: process.env.RECAPTCHA_KEY
 })
 
-/* GET home page. */
 var app = express();
+
 app.use(favicon(__dirname + '/../favicon.ico'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
@@ -26,6 +27,9 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use(methodOverride('X-HTTP-Method-Override'));
+
+//Create the sessions and open a new DB connection just for session handling 
+var dbURL = 'mongodb://' + process.env.MONGO_HOST + '/api';
 app.use(session({
 	name: 'session',
 	secret: process.env.SESSION_SECRET,
@@ -33,8 +37,12 @@ app.use(session({
 	resave: true,
 	cookie: {
 		maxAge: 1800000 //30 minutes
-	}
+	},
+	store: new mongoStore({
+		url: dbURL
+	})
 }));
+
 app.use(function (req, res, next) {
 	var err = req.session.error,
 		message = req.session.message;
@@ -156,6 +164,7 @@ app.post('/profile/changeEmail', function (req, res, next) {
 		})
 	}
 })
+
 app.get('/profile/changePassword', function (req, res, next) {
 	res.render('profile/changePassword')
 })
