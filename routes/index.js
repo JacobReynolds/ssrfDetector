@@ -35,6 +35,7 @@ app.use(session({
 	secret: process.env.SESSION_SECRET,
 	saveUninitialized: true,
 	resave: true,
+	rolling: true,
 	cookie: {
 		maxAge: 600000 //10 minutes (in milliseconds)
 	},
