@@ -36,10 +36,11 @@ app.use(session({
 	saveUninitialized: true,
 	resave: true,
 	cookie: {
-		maxAge: 1800000 //30 minutes
+		maxAge: 600000 //10 minutes (in milliseconds)
 	},
 	store: new mongoStore({
-		url: dbURL
+		url: dbURL,
+		ttl: 600 //10 minutes (in seconds)
 	})
 }));
 
@@ -376,14 +377,26 @@ app.post('/reportDomain', function (req, res) {
 			ip: req.body.ip,
 			headers: JSON.parse(req.body.headers)
 		}).then(function (email) {
-			sendMail.sendReport(email, req.body.domain, req.body.ip);
+			if (email) {
+				sendMail.sendReport(email, req.body.domain, req.body.ip);
+			}
 			res.send("200");
 		})
 	}
 })
 
+app.post('/resetRateLimits', function (req, res) {
+	if (req.body.apiKey === process.env.BLINKIE_KEY) {
+		database.resetRateLimits(req).then(function () {
+			res.send("200");
+		})
+	} else {
+		console.log('body: ' + req.body.apiKey);
+		console.log('sever: ' + process.env.BLINKIE_KEY);
+		res.send("500");
+	}
+})
 
-//=======================PASSPORT CODE=======================
 
 function verifyEmailRegex(email) {
 	var emailRegex = new RegExp(/^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i);

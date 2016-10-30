@@ -1,7 +1,7 @@
 var bcrypt = require('bcryptjs'),
-	crypto = require('crypto')
-Q = require('q');
-//config = require('./config.js'), //config file contains all tokens and other private info
+	crypto = require('crypto'),
+	Q = require('q'),
+	rateLimitAmount = 10;
 
 //used in local-signup strategy
 exports.localReg = function (req, email, password) {
@@ -25,10 +25,8 @@ exports.localReg = function (req, email, password) {
 				deferred.reject(err.body); //email already exists
 			}
 			if (docs.length != 0) {
-				console.log('email already exists');
 				deferred.reject("Email already taken"); //email already exists
 			} else {
-				console.log('Email is free for use');
 				if (password != passwordConfirm) {
 					deferred.reject("Passwords do not match");
 				} else {
@@ -73,7 +71,6 @@ exports.localAuth = function (req, email, password) {
 					deferred.resolve(docs[0]);
 				}
 			} else {
-				console.log("PASSWORDS NOT MATCH");
 				deferred.reject("Incorrect email or password");
 			}
 		}
@@ -134,8 +131,6 @@ exports.getResetLink = function (req) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
-			console.log('doc length: ' + docs.length);
-			console.log("Error: Expired or non-existent link");
 			deferred.reject("Expired or non-existent link.");
 		} else {
 			deferred.resolve(resetLink);
@@ -157,7 +152,6 @@ exports.registerDomain = function (req) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
 		} else if (docs.length === 0) {
-			console.log('setting ' + req.session.user.email + '\'s domain to ' + domain);
 			req.session.user.domain = domain;
 			db.updateOne({
 				email: req.session.user.email
@@ -265,28 +259,30 @@ exports.reportDomain = function (req, domain, report) {
 		if (err != null) {
 			console.log("Error: " + err.body);
 			deferred.reject(err.body);
-		} else if (docs.length === 0) {
-			console.log("Error finding domain: " + domain);
-			deferred.reject("Error finding domain");
 		} else {
-			var email = docs[0].email;
-			console.log('reporting for email: ' + email);
 			db = req.app.get("db").collection('reports');
-			db.updateOne({
-				'email': email
-			}, {
+			db.findAndModify({
+				'email': docs[0].email
+			}, [], {
 				$push: {
 					reports: {
 						$each: [report],
 						$slice: -10
 					}
+				},
+				$inc: {
+					'rateLimit': 1
 				}
 			}, {
 				upsert: true
 			}, function (err, result) {
 				if (err === null) {
-					console.log('successful');
-					deferred.resolve(docs[0].email);
+					//Only return an email if they haven't hit their daily limit
+					if (result.value.rateLimit > rateLimitAmount) {
+						deferred.resolve(null);
+					} else {
+						deferred.resolve(docs[0].email);
+					}
 				} else {
 					console.log("Report add FAIL:" + err.body);
 					deferred.reject(new Error(err.body));
@@ -312,7 +308,11 @@ exports.getReport = function (req, email) {
 			deferred.resolve([]);
 		} else if (docs[0].reports && docs[0].reports.length > 0) {
 			//reversing array so recent reports are at the top
-			deferred.resolve(docs[0].reports.reverse());
+			var rateLimit = rateLimitAmount - docs[0].rateLimit;
+			deferred.resolve({
+				items: docs[0].reports.reverse(),
+				rateLimit: Math.max(rateLimit, 0)
+			});
 		} else {
 			deferred.resolve([]);
 		}
@@ -408,8 +408,6 @@ exports.updateEmail = function (req) {
 					if (err === null) {
 						db = req.app.get("db").collection('reports');
 						//Update reports to link with new email
-						console.log('oldEmail: ' + oldEmail);
-						console.log('newEmail: ' + newEmail);
 						db.update({
 							email: oldEmail
 						}, {
@@ -432,6 +430,28 @@ exports.updateEmail = function (req) {
 			}
 		} else {
 			deferred.reject('Email taken');
+		}
+	})
+	return deferred.promise;
+}
+
+exports.resetRateLimits = function (req) {
+	var deferred = Q.defer();
+	var db = req.app.get("db").collection('reports');
+	console.log('in reset rate limits');
+	db.update({}, {
+		$set: {
+			'rateLimit': 0
+		}
+	}, {
+		multi: true
+	}, function (err, result) {
+		if (err === null) {
+			console.log('finished resetting limits')
+			deferred.resolve();
+		} else {
+			console.log("Reset rate limit FAIL:" + err.body);
+			deferred.reject(new Error(err.body));
 		}
 	})
 	return deferred.promise;

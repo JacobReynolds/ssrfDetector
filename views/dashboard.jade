@@ -5,12 +5,16 @@ block append headExtender
 	
 block content
 	h1#hello.dashboardH1 hello #{user.username}
-	if report && report.length > 0
+	if report.items && report.items.length > 0
 			div.col-xs-12.text-center
 				h2.dashboardH2
 					strong
-						| #{report.length} Most Recent Detections
-			each item in report
+						| #{report.items.length} Most Recent Detections
+			div.col-xs-12.text-center
+				h2.dashboardH2
+					strong
+						| #{report.rateLimit} Email notification(s) left for today
+			each item in report.items
 				div.col-xs-12.col-sm-8.col-sm-offset-2.col-md-6.col-md-offset-3.detection
 					strong IP Address
 					li= item.ip
