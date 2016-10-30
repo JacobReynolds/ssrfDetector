@@ -33,7 +33,7 @@ var dbURL = 'mongodb://' + process.env.MONGO_HOST + '/api';
 app.use(session({
 	name: 'session',
 	secret: process.env.SESSION_SECRET,
-	saveUninitialized: true,
+	saveUninitialized: false,
 	resave: true,
 	rolling: true,
 	cookie: {
