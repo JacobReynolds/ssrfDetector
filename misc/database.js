@@ -353,7 +353,7 @@ exports.deleteAccount = function (req) {
 	}, function (err, result) {
 		if (err === null) {
 			db = req.app.get('db').collection('reports');
-			db.deleteMany({
+			db.deleteOne({
 				'email': req.session.user.email
 			}, function (err, result) {
 				if (err === null) {
@@ -377,8 +377,12 @@ exports.deleteDetections = function (req) {
 	var deferred = Q.defer();
 	var email = req.session.user.email;
 	var db = req.app.get("db").collection('reports');
-	db.deleteMany({
+	db.updateOne({
 		'email': email
+	}, {
+		$set: {
+			reports: []
+		}
 	}, function () {
 		deferred.resolve();
 	})
