@@ -11,7 +11,13 @@ var express = require('express'),
 	fs = require('fs'),
 	reportingApiKey, creds,
 	favicon = require('serve-favicon'),
-	reCAPTCHA = require('recaptcha2');
+	reCAPTCHA = require('recaptcha2'),
+	helmet = require('helmet'),
+	csrf = require('csurf');
+
+var csrfProtection = csrf({
+	cookie: false
+});
 
 recaptcha = new reCAPTCHA({
 	siteKey: '6LdmhwkUAAAAAL3mbSCZh4T0eA2P3kYjZDxTcC_d',
@@ -28,6 +34,9 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 app.use(methodOverride('X-HTTP-Method-Override'));
 
+//Make headers more strict
+app.use(helmet());
+
 //Create the sessions and open a new DB connection just for session handling 
 var dbURL = 'mongodb://' + process.env.MONGO_HOST + '/api';
 app.use(session({
@@ -37,7 +46,7 @@ app.use(session({
 	resave: true,
 	rolling: true,
 	cookie: {
-		maxAge: 600000 //10 minutes (in milliseconds)
+		maxAge: 600000 //10 minutes (in milliseconds),
 	},
 	store: new mongoStore({
 		url: dbURL,
@@ -47,16 +56,20 @@ app.use(session({
 
 app.use(function (req, res, next) {
 	var err = req.session.error,
-		message = req.session.message;
+		message = req.session.message,
+		_csrf = req.session._csrf;
 
 	delete req.session.error;
 	delete req.session.message;
+	delete req.session._csrf;
 
 	if (err) res.locals.error = err;
 	if (message) res.locals.message = message;
+	if (_csrf) res.locals._csrf = _csrf;
 
 	next();
 });
+
 app.all('*', function (req, res, next) {
 	res.locals.user = req.session.user || null;
 
@@ -67,37 +80,10 @@ function isAuthenticated(req) {
 	return req.session.user && req.session.user.email != null;
 }
 
-app.all('/profile/*', function (req, res, next) {
-	if (isAuthenticated(req)) {
-		next();
-	} else {
-		req.session.error = "Please log in"
-		res.redirect('/login');
-	}
-})
-
-//Should find a way to put /profile and /profile/* into one, will do later
-app.all('/profile', function (req, res, next) {
-	if (isAuthenticated(req)) {
-		next();
-	} else {
-		req.session.error = "Please log in";
-		res.redirect('/login');
-	}
-})
-
-app.all('/dashboard/*', function (req, res, next) {
-	if (isAuthenticated(req)) {
-		next();
-	} else {
-		req.session.error = "Please log in";
-		res.redirect('/login');
-	}
-})
-
 //Should find a way to put /dashboard and /dashboard/* into one, will do later
-app.all('/dashboard', function (req, res, next) {
+app.all(/\/(dashboard|profile)(\/.*)?/, csrfProtection, function (req, res, next) {
 	if (isAuthenticated(req)) {
+		req.session._csrf = req.csrfToken();
 		next();
 	} else {
 		req.session.error = "Please log in";
@@ -117,7 +103,7 @@ app.get('/profile', function (req, res) {
 	res.render('profile');
 });
 
-app.post('/profile/changePassword', function (req, res, next) {
+app.post('/profile/changePassword', csrfProtection, function (req, res, next) {
 	if (req.body.newPassword.length > 48) {
 		res.render('profile/changePassword', {
 			error: 'Password must be 48 characters or less.'
@@ -143,7 +129,7 @@ app.get('/profile/changeEmail', function (req, res) {
 	res.render('profile/changeEmail');
 })
 
-app.post('/profile/changeEmail', function (req, res, next) {
+app.post('/profile/changeEmail', csrfProtection, function (req, res, next) {
 	if (req.body.newEmail.length > 254) {
 		res.render('profile/changeEmail', {
 			error: 'Email must be 254 characters or less'
@@ -258,7 +244,7 @@ app.get('/dashboard', function (req, res, next) {
 	}).catch(next);
 });
 
-app.post('/dashboard/deleteDetections', function (req, res, next) {
+app.post('/dashboard/deleteDetections', csrfProtection, function (req, res, next) {
 	database.deleteDetections(req).then(function (data) {
 			res.redirect('/dashboard');
 		})
@@ -269,7 +255,7 @@ app.post('/dashboard/deleteDetections', function (req, res, next) {
 		}).catch(next);
 })
 
-app.post('/dashboard/deleteAccount', function (req, res, next) {
+app.post('/dashboard/deleteAccount', csrfProtection, function (req, res, next) {
 	database.deleteAccount(req).then(function (data) {
 			req.session.destroy();
 			res.redirect('/');
@@ -281,7 +267,7 @@ app.post('/dashboard/deleteAccount', function (req, res, next) {
 		}).catch(next);
 })
 
-app.post('/profile/registerDomain', function (req, res, next) {
+app.post('/profile/registerDomain', csrfProtection, function (req, res, next) {
 	req.body.domain = req.body.domain.toLowerCase();
 	var domainAlphaNumberic = new RegExp(/^[a-z0-9]+$/i);
 	if (req.body.domain.length > 6) {
