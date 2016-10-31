@@ -280,7 +280,7 @@ exports.reportDomain = function (req, domain, report) {
 			}, function (err, result) {
 				if (err === null) {
 					//Only return an email if they haven't hit their daily limit
-					if (result.value.rateLimit > rateLimitAmount) {
+					if (result.value && result.value.rateLimit > rateLimitAmount) {
 						deferred.resolve(null);
 					} else {
 						deferred.resolve(docs[0].email);
