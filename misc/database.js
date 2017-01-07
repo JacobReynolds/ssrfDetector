@@ -234,6 +234,7 @@ exports.updatePassword = function (req) {
 				}
 			}, function (err, result) {
 				if (err === null) {
+					req.session.user.password=newPassword;
 					deferred.resolve('Password reset');
 				} else {
 					console.log("Reset password FAIL:" + err.body);
