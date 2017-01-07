@@ -54,10 +54,13 @@ app.use(session({
 	})
 }));
 
+//Set this here so the later app.use can call req.csrfToken()
+app.use(csrfProtection);
+
 app.use(function (req, res, next) {
 	var err = req.session.error,
 		message = req.session.message,
-		_csrf = req.session._csrf;
+		_csrf = req.csrfToken();
 
 	delete req.session.error;
 	delete req.session.message;
@@ -82,12 +85,11 @@ function isAuthenticated(req) {
 
 //Should find a way to put /dashboard and /dashboard/* into one, will do later
 app.all(/\/(dashboard|profile)(\/.*)?/, csrfProtection, function (req, res, next) {
-	if (isAuthenticated(req)) {
-		req.session._csrf = req.csrfToken();
-		next();
-	} else {
+	if (!isAuthenticated(req)) {
 		req.session.error = "Please log in";
 		res.redirect('/login');
+	} else {
+		next();
 	}
 })
 
@@ -158,8 +160,8 @@ app.get('/profile/changePassword', function (req, res, next) {
 })
 
 app.post('/login', function (req, res, next) {
-	recaptcha.validateRequest(req)
-		.then(function () {
+	//recaptcha.validateRequest(req)
+	//	.then(function () {
 			database.localAuth(req, req.body.email.toLowerCase(), req.body.password)
 				.then(function (user) {
 					if (user) {
@@ -177,14 +179,14 @@ app.post('/login', function (req, res, next) {
 					res.redirect('/login');
 				});
 		})
-		.catch(function (errorCodes) {
+	/*	.catch(function (errorCodes) {
 			// invalid
 			res.render('login', {
 					error: 'Invalid captcha'
 				}) // translate error codes to human readable text
 		});
 
-});
+});*/
 
 app.get('/register', function (req, res) {
 	res.render('register');
