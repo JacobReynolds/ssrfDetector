@@ -160,8 +160,8 @@ app.get('/profile/changePassword', function (req, res, next) {
 })
 
 app.post('/login', function (req, res, next) {
-	//recaptcha.validateRequest(req)
-	//	.then(function () {
+	recaptcha.validateRequest(req)
+		.then(function () {
 			database.localAuth(req, req.body.email.toLowerCase(), req.body.password)
 				.then(function (user) {
 					if (user) {
@@ -179,14 +179,14 @@ app.post('/login', function (req, res, next) {
 					res.redirect('/login');
 				});
 		})
-	/*	.catch(function (errorCodes) {
+		.catch(function (errorCodes) {
 			// invalid
 			res.render('login', {
 					error: 'Invalid captcha'
 				}) // translate error codes to human readable text
 		});
 
-});*/
+});
 
 app.get('/register', function (req, res) {
 	res.render('register');
