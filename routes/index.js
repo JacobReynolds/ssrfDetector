@@ -54,9 +54,12 @@ app.use(session({
 	})
 }));
 
+//Add external router to bypass csrf checks
+var external = createExternalRouter()
+app.use('/external', external)
+
 //Set this here so the later app.use can call req.csrfToken()
 app.use(csrfProtection);
-
 app.use(function (req, res, next) {
 	var err = req.session.error,
 		message = req.session.message,
@@ -360,29 +363,37 @@ app.get('/logout', function (req, res) {
 	res.redirect('/');
 });
 
-app.post('/reportDomain', function (req, res) {
-	if (req.body.apiKey === process.env.BLINKIE_KEY) {
-		database.reportDomain(req, req.body.domain, {
-			ip: req.body.ip,
-			headers: JSON.parse(req.body.headers)
-		}).then(function (email) {
-			if (email) {
-				sendMail.sendReport(email, req.body.domain, req.body.ip);
-			}
-			res.send("200");
-		})
-	}
-})
+//These will be prepended with /external
+//Used for ignoring CSRF
+function createExternalRouter() {
+	var router = new express.Router()
 
-app.post('/resetRateLimits', function (req, res) {
-	if (req.body.apiKey === process.env.BLINKIE_KEY) {
-		database.resetRateLimits(req).then(function () {
-			res.send("200");
-		})
-	} else {
-		res.send("500");
-	}
-})
+	router.post( /*/external*/ '/reportDomain', function (req, res) {
+		if (req.body.apiKey === process.env.BLINKIE_KEY) {
+			database.reportDomain(req, req.body.domain, {
+				ip: req.body.ip,
+				headers: JSON.parse(req.body.headers)
+			}).then(function (email) {
+				if (email) {
+					sendMail.sendReport(email, req.body.domain, req.body.ip);
+				}
+				res.send("200");
+			})
+		}
+	})
+
+	router.post( /*/external*/ '/resetRateLimits', function (req, res) {
+		if (req.body.apiKey === process.env.BLINKIE_KEY) {
+			database.resetRateLimits(req).then(function () {
+				res.send("200");
+			})
+		} else {
+			res.send("500");
+		}
+	})
+	return router
+
+}
 
 
 function verifyEmailRegex(email) {
