@@ -18,3 +18,6 @@ For the actual website these variables were set at runtime, as it is not secure 
 Install [docker-compose](https://docs.docker.com/compose/install/) then run `docker-compose build; docker-compose up;`.  The `up` command may have to be run twice, as docker-compose sometimes launches the NodeJS app before Mongo is done initializing.  In that case run `docker-compose down; docker-compose up`;
 
 The SSRF Detector website will be hosted on http://localhost:3000 and the Blinkie server will be run on http://localhost:3001.  It is best to set up Nginx to handle the domain names for these and point the public-facing ports 80/443 to these ports.
+
+## Thanks!
+Thanks for checking out SSRF Detector, it's been a fun project to help me learn more about Docker and MongoDB.  If you find any issues or have any questions please feel free to create an Issue, or email me at jreynoldsdev@gmail.com.
