@@ -7,10 +7,9 @@ This is the application source code for the SSRF Detector website.  The website 
 Setting up the application is pretty easy.  The following things will be needed:
 * Mailgun API key
 * Google Recaptcha site/private keys
-
-These will be set in core/Dockerfile as environmental variables alongside the following variables:
 * Blinkie API key (create this yourself and set in core/Dockerfile as well as blinkie/.creds/apiKey.json)
 * Session secret (any >24 character random string)
+These will be set in core/Dockerfile as environmental variables.
 
 For the actual website these variables were set at runtime, as it is not secure to store these in files.  These were fed in at runtime using [RancherOS](http://rancher.com/clustering-a-node-js-application-with-mongo-docker-and-rancher/) which is a great container management platform (among other things).  RancherOS also helped secure the databases, that is why there is no DB auth set up in this instance.
 
