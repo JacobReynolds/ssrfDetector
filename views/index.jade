@@ -1,0 +1,63 @@
+extends layout
+block append headExtender
+	link(rel="stylesheet", href="/stylesheets/index.css")
+
+block content
+	div#indexHeader
+		h1 SSRF DETECTOR
+		h2
+			a(href="/register")
+				| Get Started Here!			
+	hr
+	div.row
+		div.col-xs-12.col-sm-6.col-md-4.col-md-offset-2.why
+			h2 Why?
+			p External server-side request forgery is a hassle to detect, so I created the SSRF Detector.  Grab your own Blinkie subdomain and use that for all of your SSRF testing, you will receive an email when any requests are successful.  Also check out the 
+				a(href="/dashboard")
+					| dashboard 
+				| to see your 10 most recent Detections.
+		div.col-xs-12.col-sm-6.col-md-4.why
+			h2 SSR(WT)F?!
+			p For a great explanation of what server-side request forgery is please go 
+				a(href="https://www.bishopfox.com/blog/2015/04/vulnerable-by-design-understanding-server-side-request-forgery/", target="_blank")
+					| here
+				| .
+	div.row
+		div.col-xs-12.col-sm-6.col-md-4.col-md-offset-2.why
+			h2 How do I start?
+			div.video-container
+				iframe(width='560', height='315', src='https://www.youtube.com/embed/oBQ2wLkx4hM', frameborder='0', allowfullscreen='')
+		div.col-xs-12.col-sm-6.col-md-4.why
+			h2 Can I buy you a cup of coffee?
+			p Absolutely!  I fund all of this myself, so I appreciate any help at all.  You can buy me a cup of coffee or pay for some server time below. 
+				form(action='https://www.paypal.com/cgi-bin/webscr', method='post', target='_top').text-center
+					input(type='hidden', name='cmd', value='_s-xclick')
+					input(type='hidden', name='encrypted', value='-----BEGIN PKCS7-----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-----END PKCS7-----\
+  				')
+					input(type='image', src='https://static1.squarespace.com/static/528e97bbe4b0e2f77a6e1455/t/5293fa7ae4b0f601b40ec24e/1385429627883/Donatebutton.png', border='0', name='submit', alt='PayPal - The safer, easier way to pay online!', height="50")
+					img(alt='', border='0', src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif', width='1', height='1')
+	div.row
+		div.col-xs-12.col-sm-6.col-md-4.col-md-offset-2.why
+			h2 Having problems?
+			p Feel free to contact me at jreynoldsdev(at)gmail.com.
+		div.col-xs-12.col-sm-6.col-md-4.why
+			h2 Thanks
+			p Special thanks to 
+				a(href="https://xsshunter.com", target="_blank")
+					| XSS Hunter
+				|  for the inspiration.
+	div.row
+		div.col-xs-12.col-sm-6.col-md-4.col-md-offset-2.why.sucks
+			h2 Why is the UI so terrible?
+			p Because I'm terrible at UI design.
+		div.col-xs-12.col-sm-6.col-md-4.why
+			h2 I'm Ron Burgundy?
+			p That's enough with the questions.  View the source code 
+				a(href="https://github.com/jacobreynolds/ssrfdetector", target="_blank")
+					| here
+				| .
+			p View some cool stats 
+				a(href="https://medium.com/@jakereynolds/ssrf-detector-a-pre-post-mortem-5bd647df3a65#.wl3l9ava8", target="_blank")
+					| here
+				| .
+
