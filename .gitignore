@@ -16,4 +16,7 @@ build
 data
 
 node_modules
+<<<<<<< HEAD
 Dockerfile.bak
+=======
+>>>>>>> gh-pages
