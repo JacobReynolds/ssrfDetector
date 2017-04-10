@@ -17,13 +17,7 @@ For the actual website these variables were set at runtime, as it is not secure 
 I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:80/443 -> localhost:3000 and blinkie.xyz:80/443 -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.  And always remeber to set up SSL, but that is out of the scope of this documentation.
 
 ### Ports
-IP Tables rules will need to be made to forward a range of ports to the Blinkie application, so that it can detect requests outside of just ports 80 and 443. There currently is no DNS detection, but I would love if someone made a pull request to add that.  The IPTables rules I used were:
-
-`iptables -A INPUT -p tcp --match multiport --dports 23:65535 -j ACCEPT`
-
-`iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 23:65535 -j REDIRECT --to-port 80`
-
-Similar can be done with port 443.
+IP Tables rules will need to be made to forward a range of ports to the Blinkie application, so that it can detect requests outside of just ports 80 and 443. There currently is no DNS detection, but I would love if someone made a pull request to add that.  Be careful when opening ports, MongoDB is run on port 27017 and **should not** be open to the public.
 
 ### Ratelimit
 There will also need to be a cronjob set up to run the blinkie/resetRateLimits.js NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
