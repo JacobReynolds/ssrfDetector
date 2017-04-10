@@ -15,7 +15,7 @@ These will be set in core/Dockerfile as environmental variables.
 For the actual website these variables were set at runtime, as it is not secure to store these in files.  These were fed in at runtime using [RancherOS](http://rancher.com/clustering-a-node-js-application-with-mongo-docker-and-rancher/) which is a great container management platform (among other things).  RancherOS also helped secure the databases, that is why there is no DB auth set up in this instance.
 
 ### Nginx
-I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:80/443 -> localhost:3000 and blinkie.xyz:80/443 -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.
+I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:443 -> localhost:3000 and blinkie.xyz:80/443 -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.
 
 ### Ports
 IP Tables rules will need to be made to forward a range of ports to the Blinkie application, so that it can detect requests outside of just ports 80 and 443. There currently is no DNS detection, but I would love if someone made a pull request to add that.  Be careful when opening ports, MongoDB is run on port 27017 and **should not** be open to the public.
