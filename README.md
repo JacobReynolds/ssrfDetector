@@ -13,6 +13,9 @@ These will be set in core/Dockerfile as environmental variables.
 
 For the actual website these variables were set at runtime, as it is not secure to store these in files.  These were fed in at runtime using [RancherOS](http://rancher.com/clustering-a-node-js-application-with-mongo-docker-and-rancher/) which is a great container management platform (among other things).  RancherOS also helped secure the databases, that is why there is no DB auth set up in this instance.
 
+### Nginx
+I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:80 -> localhost:3000 and blinkie.xyz -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.
+
 ### Ratelimit
 There will also need to be a cronjob set up to run the blinkie/resetRateLimits.js NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
 
@@ -22,7 +25,7 @@ For local use add an entry into the /etc/hosts file for '127.0.0.1 a.blinkie.xyz
 ## Running
 Install [docker-compose](https://docs.docker.com/compose/install/) then run `docker-compose build; docker-compose up;`.  The `up` command may have to be run twice, as docker-compose sometimes launches the NodeJS app before Mongo is done initializing.  In that case run `docker-compose down; docker-compose up`;
 
-The SSRF Detector website will be hosted on http://localhost:3000 and the Blinkie server will be run on http://localhost:3001.  It is best to set up Nginx to handle the domain names for these and point the public-facing ports 80/443 to these ports.
+The SSRF Detector website will be hosted on http://localhost:3000 and the Blinkie server will be run on http://localhost:3001.  Note: the Blinkie server needs to be accessed by a domain name, otherwise it will not know which subdomain to report for.
 
 ## Thanks!
 Thanks for checking out SSRF Detector, it's been a fun project to help me learn more about Docker and MongoDB.  If you find any issues or have any questions please feel free to create an Issue, or email me at jreynoldsdev@gmail.com.
