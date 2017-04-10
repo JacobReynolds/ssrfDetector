@@ -14,12 +14,7 @@ var reportDomain = {
 	}
 };
 
-var creds, apiKey;
-fs.readFile(__dirname + '/.creds/apiKey.json', 'utf8', function (err, data) {
-	if (err) throw err;
-	creds = JSON.parse(data);
-	apiKey = creds.apiKey;
-});
+var apiKey = process.env.BLINKIE_KEY;
 
 //We need a function which handles requests and send response
 function handleRequest(request, response) {
