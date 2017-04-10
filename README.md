@@ -20,6 +20,7 @@ I used Nginx as a personal preference, but any web server will do.  Nginx was us
 IP Tables rules will need to be made to forward a range of ports to the Blinkie application, so that it can detect requests outside of just ports 80 and 443. There currently is no DNS detection, but I would love if someone made a pull request to add that.  The IPTables rules I used were:
 
 `iptables -A INPUT -p tcp --match multiport --dports 23:65535 -j ACCEPT`
+
 `iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 23:65535 -j REDIRECT --to-port 80`
 
 Similar can be done with port 443.
