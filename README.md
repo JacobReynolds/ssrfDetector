@@ -21,7 +21,7 @@ I used Nginx as a personal preference, but any web server will do.  Nginx was us
 IP Tables rules will need to be made to forward a range of ports to the Blinkie application, so that it can detect requests outside of just ports 80 and 443. There currently is no DNS detection, but I would love if someone made a pull request to add that.  Be careful when opening ports, MongoDB is run on port 27017 and **should not** be open to the public.
 
 ### Ratelimiting
-There will need to be a cronjob set up to run the blinkie/resetRateLimits.js NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
+There will need to be a cronjob set up to run the [blinkie/resetRateLimits.js](blinkie/resetRateLimits.js) NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
 
 ### Local use
 For local use add an entry into the /etc/hosts file for '127.0.0.1 a.blinkie.xyz' and register 'a' as the subdomain.  Then http://a.blinkie.xyz:3001 can be used to trigger a request.  The 3001 can be left off if a proper Nginx file is setup.
