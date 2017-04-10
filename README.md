@@ -1,4 +1,4 @@
-<img src="/public/images/logo.png"/>
+<img src="core/public/images/logo.png"/>
 <h1>SSRF Detector</h1>
 
 [![](https://images.microbadger.com/badges/image/jreynoldsdev/ssrfdetector.svg)](https://microbadger.com/images/jreynoldsdev/ssrfdetector "Get your own image badge on microbadger.com")
