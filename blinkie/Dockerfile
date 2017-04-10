@@ -6,7 +6,7 @@ COPY . /blinkie
 WORKDIR /blinkie
 RUN npm install --production
 
-#These core server location, where requests should be sent
+#The core server location, where requests should be sent
 ENV SSRF_HOST core
 ENV SSRF_HOST_PORT 3000
 ENV PORT 3001
