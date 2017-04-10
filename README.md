@@ -1,7 +1,7 @@
 <img src="core/public/images/logo.png"/>
 <h1>SSRF Detector</h1>
 
-This is the application source code for the SSRF Detector website.  The website has been EOL as of April 7th 2017, but the code has been updated to be run on a local machine.
+This is the application source code for the SSRF Detector website.  The website has been EOL as of April 7th 2017, but the code has been updated to be run on a local machine.  This documentation is a little touch-and-go as there is a lot of configuration for Nginx, SSL, etc... but for a local instance it can be ran as-is.
 
 ## Setup
 Setting up the application is pretty easy.  The following things will be needed:
@@ -12,6 +12,12 @@ Setting up the application is pretty easy.  The following things will be needed:
 These will be set in core/Dockerfile as environmental variables.
 
 For the actual website these variables were set at runtime, as it is not secure to store these in files.  These were fed in at runtime using [RancherOS](http://rancher.com/clustering-a-node-js-application-with-mongo-docker-and-rancher/) which is a great container management platform (among other things).  RancherOS also helped secure the databases, that is why there is no DB auth set up in this instance.
+
+### Ratelimit
+There will also need to be a cronjob set up to run the blinkie/resetRateLimits.js NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
+
+### Local use
+For local use add an entry into the /etc/hosts file for '127.0.0.1 a.blinkie.xyz' and register 'a' as the subdomain.  Then http://a.blinkie.xyz:3001 can be used to access the server.  The 3001 can be left off if a proper Nginx file is setup.
 
 ## Running
 Install [docker-compose](https://docs.docker.com/compose/install/) then run `docker-compose build; docker-compose up;`.  The `up` command may have to be run twice, as docker-compose sometimes launches the NodeJS app before Mongo is done initializing.  In that case run `docker-compose down; docker-compose up`;
