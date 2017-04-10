@@ -1,0 +1,20 @@
+version: '2'
+services:
+  mongo:
+    image: "mongo"
+    ports:
+      - "27017"
+    volumes:
+      - './data:/data/db'
+  core:
+    build: ./core/.
+    ports:
+      - "3000:3000"
+    links:
+      - mongo
+  blinkie:
+    build: ./blinkie/.
+    ports:
+      - "3001:3001"
+    links:
+      - core

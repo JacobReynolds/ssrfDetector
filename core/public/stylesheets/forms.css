@@ -1,0 +1,14 @@
+form input {
+	margin-top: 10px;
+	height: 50px !important;
+	font-size: 24px !important;
+}
+form {
+	margin-bottom: 40px;
+}
+.alert {
+	margin-top: 10px;
+}
+a {
+	font-size: 24px;
+}
