@@ -20,7 +20,6 @@ exports.resetRateLimits = function () {
 		var postData = {
 			apiKey: creds.apiKey
 		}
-		console.log('apiKey: ' + JSON.stringify(creds))
 		postData = querystring.stringify(postData);
 		resetDomain.headers['Content-Length'] = Buffer.byteLength(postData);
 		var req = http.request(resetDomain, null);
