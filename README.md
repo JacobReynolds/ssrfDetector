@@ -14,7 +14,7 @@ These will be set in core/Dockerfile as environmental variables.
 For the actual website these variables were set at runtime, as it is not secure to store these in files.  These were fed in at runtime using [RancherOS](http://rancher.com/clustering-a-node-js-application-with-mongo-docker-and-rancher/) which is a great container management platform (among other things).  RancherOS also helped secure the databases, that is why there is no DB auth set up in this instance.
 
 ### Nginx
-I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:80 -> localhost:3000 and blinkie.xyz -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.
+I used Nginx as a personal preference, but any web server will do.  Nginx was used to route the proper domain names to the ports.  This app works best when set up with Nginx server blocks to forward ssrfdetector.com:80/443 -> localhost:3000 and blinkie.xyz:80/443 -> localhost:3001.  Otherwise the lack of hostnames can cause issues sometimes.  And always remeber to set up SSL, but that is out of the scope of this documentation.
 
 ### Ratelimit
 There will also need to be a cronjob set up to run the blinkie/resetRateLimits.js NodeJS file.  This can be set up [easily](https://help.ubuntu.com/community/CronHowto) and I ran it once a day to reset the ratelimits.
