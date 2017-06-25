@@ -1,4 +1,4 @@
-var http = require('http');
+var https = require('https');
 var querystring = require('querystring');
 var fs = require('fs');
 
@@ -18,7 +18,7 @@ exports.resetRateLimits = function() {
     }
     postData = querystring.stringify(postData);
     resetDomain.headers['Content-Length'] = Buffer.byteLength(postData);
-    var req = http.request(resetDomain, null);
+    var req = https.request(resetDomain, null);
     console.log('running');
     req.write(postData);
     req.end();

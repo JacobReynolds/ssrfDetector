@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var dbConf = require('./config/database.js');
 var app = express();
 
 // view engine setup
@@ -25,7 +26,7 @@ var MongoClient = require('mongodb').MongoClient,
 
 // Connection URL
 // Use connect method to connect to the server
-MongoClient.connect("mongodb://mongo/api", function (err, dbConn) {
+MongoClient.connect(dbConf.url, function (err, dbConn) {
 	assert.equal(null, err);
 	console.log("Connected successfully to server");
 

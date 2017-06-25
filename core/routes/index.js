@@ -14,6 +14,8 @@ var express = require('express'),
 	reCAPTCHA = require('recaptcha2'),
 	helmet = require('helmet'),
 	csrf = require('csurf');
+	var dbConf = require('../config/database.js');
+
 
 var csrfProtection = csrf({
 	cookie: false
@@ -38,7 +40,6 @@ app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(helmet());
 
 //Create the sessions and open a new DB connection just for session handling
-var dbURL = 'mongodb://mongo/api';
 app.use(session({
 	name: 'session',
 	secret: process.env.SESSION_SECRET,
@@ -49,7 +50,7 @@ app.use(session({
 		maxAge: 600000 //10 minutes (in milliseconds),
 	},
 	store: new mongoStore({
-		url: dbURL,
+		url: dbConf.url,
 		ttl: 600 //10 minutes (in seconds)
 	})
 }));
@@ -305,6 +306,11 @@ app.get('/resetPasswordEmail', function (req, res) {
 	res.render('resetPasswordEmail');
 });
 
+app.get('/healthcheck', function (req, res) {
+	req.session.destroy();
+	res.status(200).send('OK');
+});
+
 app.post('/resetPasswordEmail', function (req, res, next) {
 	database.setResetLink(req).then(function (data) {
 			sendMail.sendResetLink(data.email, data.resetLink);
@@ -370,6 +376,7 @@ function createExternalRouter() {
 
 	router.post( /*/external*/ '/reportDomain', function (req, res) {
 		if (req.body.apiKey === process.env.BLINKIE_KEY) {
+			console.log("External report received");
 			database.reportDomain(req, req.body.domain, {
 				ip: req.body.ip,
 				headers: JSON.parse(req.body.headers)
@@ -379,6 +386,8 @@ function createExternalRouter() {
 				}
 				res.send("200");
 			})
+		} else {
+			console.log("External report received with invalid API key");
 		}
 	})
 
